@@ -1,0 +1,572 @@
+:root {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+
+  --bg1: #f6f7fb;
+  --bg2: #eef1f8;
+
+  --glass: rgba(255,255,255,0.72);
+  --glass2: rgba(255,255,255,0.55);
+  --border: rgba(0,0,0,0.08);
+
+  --text: rgba(0,0,0,0.88);
+  --muted: rgba(0,0,0,0.55);
+  --muted2: rgba(0,0,0,0.42);
+
+  --shadow: 0 18px 40px rgba(0,0,0,0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(900px 600px at 10% 0%, #ffd6e8, transparent 55%),
+    radial-gradient(800px 600px at 90% 10%, #d8e8ff, transparent 55%),
+    radial-gradient(900px 700px at 50% 100%, #e8fff3, transparent 55%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* App container (phone-sized) */
+.app {
+  height: 805px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 14px 14px 24px;
+}
+
+/* Sticky frosted header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 0 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.logoutLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoutLink:hover {
+  color: var(--text);
+}
+
+.sub {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Mobile stack layout */
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Frosted glass cards */
+.cameraCard,
+.resultsCard {
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* Camera card */
+.cameraCard {
+  padding: 12px;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #ddd;
+  border: 1px solid var(--border);
+}
+
+video, canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Bottom control bar */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Buttons */
+button {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 12px;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+  cursor: pointer;
+  transition: transform 0.06s ease, box-shadow 0.2s ease;
+}
+
+button:active { transform: scale(0.98); }
+button:hover { box-shadow: 0 10px 26px rgba(0,0,0,0.14); }
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Primary action (Analyze) */
+#btnAnalyze {
+  border-radius: 999px;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, #ffffff, #f0f2f7);
+  font-weight: 800;
+}
+
+/* Status text */
+.status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Results */
+.resultsCard {
+  padding: 14px;
+}
+
+.resultsCard h2 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--muted2);
+}
+
+.value {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #eee;
+}
+
+/* Looks */
+.looks {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.look {
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.65);
+  border: 1px solid var(--border);
+}
+
+.lookTitle {
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.step {
+  margin-bottom: 10px;
+}
+
+.stepTitle {
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+/* Shade chips */
+.chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border);
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.18);
+}
+
+/* Footer */
+footer {
+  margin-top: 12px;
+  color: var(--muted2);
+  font-size: 11px;
+  padding: 0 4px;
+}
+
+/* ---------- iPhone preview shell ---------- */
+.phoneShell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 22px 14px;
+}
+
+/* Outer frame: metallic stainless-steel look, thin bezel */
+.phoneFrame {
+  position: relative;
+  width: min(390px, 92vw);
+  aspect-ratio: 9 / 19.5;
+  border-radius: 52px;
+  /* Metallic gradient: dark stainless with subtle sheen */
+  background:
+    linear-gradient(145deg, #2a2a2e 0%, #1a1a1d 25%, #0d0d0f 50%, #151518 75%, #252528 100%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,0.08),
+    inset -1px -1px 0 rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.3),
+    0 20px 50px rgba(0,0,0,0.35),
+    0 40px 90px rgba(0,0,0,0.2);
+  padding: 10px;
+  border: 1px solid rgba(0,0,0,0.25);
+}
+/* Subtle metallic sheen along top edge */
+.phoneFrame::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  border-radius: 52px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner screen: thin bezel, tightly rounded corners */
+.phoneScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 42px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+/* Dynamic Island: pill-shaped cutout (iPhone 14 Pro+) */
+.phoneDynamicIsland {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28%;
+  min-width: 100px;
+  max-width: 126px;
+  height: 34px;
+  border-radius: 999px;
+  background: #000;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Side buttons: flush with metallic frame */
+.phoneBtn {
+  position: absolute;
+  z-index: 60;
+  background: linear-gradient(145deg, #1e1e21, #0f0f11);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 1px 2px rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 2px;
+}
+.phoneMute {
+  left: -2px;
+  top: 26%;
+  width: 4px;
+  height: 24px;
+  border-radius: 0 2px 2px 0;
+  transform: translateY(-50%);
+}
+.phonePower {
+  right: -3px;
+  top: 22%;
+  width: 5px;
+  height: 72px;
+  border-radius: 3px 0 0 3px;
+}
+
+/* ---------- iOS status bar ---------- */
+.statusBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  padding: 14px 48px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 40;
+  color: #000;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+  /* Ears: padding so time/icons sit beside Dynamic Island */
+  box-sizing: border-box;
+}
+
+.statusBarTime {
+  font-variant-numeric: tabular-nums;
+}
+
+.statusBarRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.statusBarIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+.statusBarIcon svg {
+  display: block;
+  width: auto;
+  height: 12px;
+}
+
+.statusBarBattery svg {
+  height: 11px;
+}
+
+/* Make your existing app fill the phone screen */
+.phoneScreen .app {
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 44px 14px 24px 14px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Give the sticky header room so it doesn't collide with the status bar */
+.phoneScreen header {
+  padding-top: 12px;
+}
+
+/* Optional: subtle "home indicator" */
+.phoneScreen::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: 34%;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
+/* ---------- Login page ---------- */
+.loginPage {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 44px 14px 24px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.phoneScreen .loginPage {
+  max-width: none;
+  width: 100%;
+  padding: 44px 14px 24px 14px;
+}
+
+.loginHeader {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.loginHeader h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.loginHeader .sub {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loginField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loginField label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.loginField input {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.loginField input::placeholder {
+  color: var(--muted2);
+}
+
+.loginField input:focus {
+  outline: none;
+  border-color: rgba(0,0,0,0.2);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+
+.loginSubmit {
+  margin-top: 8px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(180deg, #ffffff, #f0f2f7);
+  cursor: pointer;
+}
+
+.loginHint {
+  margin: 20px 0 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* If you view on a real phone, remove the bezel and fake status bar */
+@media (max-width: 520px) {
+  .phoneShell {
+    padding: 0;
+  }
+  .phoneFrame {
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+    border-radius: 0;
+    padding: 0;
+    border: none;
+  }
+  .phoneFrame::before {
+    display: none;
+  }
+  .phoneScreen {
+    border-radius: 0;
+  }
+  .phoneDynamicIsland {
+    top: 0;
+  }
+  .phoneBtn {
+    display: none;
+  }
+  .statusBar {
+    display: none;
+  }
+  .phoneScreen .app,
+  .phoneScreen .loginPage {
+    padding-top: 14px;
+  }
+}
