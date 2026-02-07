@@ -215,7 +215,7 @@ function renderPinMedia(post) {
     return `<div class="feedPinMedia feedPinImg" style="background-image: url('${escapeHtml(first)}');"></div>`;
   }
   if (type === "blog") {
-    const body = post.caption ? escapeHtml((post.caption || "").slice(0, 120)) : "";
+    const body = post.caption ? escapeHtml(post.caption || "") : "";
     return `<div class="feedPinMedia feedPinBlog"><p class="feedPinBlogBody">${body}</p></div>`;
   }
   const imgUrl = post.image_url || urls[0];
@@ -240,16 +240,20 @@ async function loadFeed() {
     .map((post) => {
       const author = post.profiles || {};
       const name = author.full_name || author.username || "Someone";
-      const title = post.caption ? (post.caption.slice(0, 60) + (post.caption.length > 60 ? "…" : "")) : "Untitled";
+      const cap = (post.caption || "").trim();
+      const titleWords = cap ? cap.split(/\s+/).slice(0, 4).join(" ") : "";
+      const title = titleWords ? titleWords.replace(/\s*[.,!?;:…\-–—]+$/, "").trim() || titleWords : "Untitled";
       const media = renderPinMedia(post);
       const sponsored = post.sponsored ? '<span class="feedPinSponsored">Sponsored</span>' : "";
       return `
         <article class="feedPin" data-post-type="${escapeHtml(post.post_type || "image")}">
-          <div class="feedPinThumbWrap">
-            ${media}
-            ${sponsored}
-          </div>
-          <p class="feedPinTitle">${escapeHtml(title)}</p>
+          <a href="/post.html?id=${escapeHtml(post.id)}" class="feedPinLink">
+            <div class="feedPinThumbWrap">
+              ${media}
+              ${sponsored}
+            </div>
+            <p class="feedPinTitle">${escapeHtml(title)}</p>
+          </a>
           <div class="feedPinFooter">
             <div class="feedPinAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">${name.charAt(0)}</div>
             <span class="feedPinUsername">${escapeHtml(name)}</span>
@@ -264,6 +268,8 @@ async function loadFeed() {
     const video = wrap.querySelector(".feedPinVideo");
     if (!video) return;
     wrap.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (e.target.closest(".feedPinPlayIcon")) return;
       wrap.classList.add("is-playing");
       video.play().catch(() => {});

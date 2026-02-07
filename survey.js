@@ -79,6 +79,7 @@ surveyForm.addEventListener("submit", async (e) => {
     sessionStorage.setItem("beautySurveyDone", "true");
   }
 
+  // "Do initial scan now" → scanner; "Do this later" → home
   if (doScanNow) {
     window.location.href = "/scanner.html?fromSurvey=1";
     return;

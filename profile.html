@@ -29,41 +29,39 @@
           </div>
 
           <div class="pageContent">
-            <div class="app appPage">
-              <!-- <header class="profileHeader">
-                <div class="profileAvatar" id="profileAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">U</div>
-                <div class="profileInfo" id="profileInfo">
-                  <h1>Your profile</h1>
-                  <p class="sub">Member · Undertone: Not set</p>
+            <div class="app appPage profilePageFigma">
+              <header class="profileFigmaHeader">
+                <div class="profileBanner" id="profileBanner"></div>
+                <h1 class="profileName" id="profileName">Your profile</h1>
+                <p class="profileHandle" id="profileHandle">@username</p>
+                <div class="profileActions">
+                  <a href="#" class="profileBtn profileBtnEdit">Edit Profile</a>
+                  <a href="/scanner.html" class="profileBtn profileBtnScanner" title="Face Scanner" aria-label="Face Scanner">
+                    <svg class="scannerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><rect x="6" y="6" width="12" height="12" rx="1" stroke-dasharray="3 2"/><path d="M2 8h2M20 8h2M2 16h2M20 16h2M8 2v2M16 2v2M8 20v2M16 20v2"/></svg>
+                  </a>
                 </div>
-              </header> -->
-              <div class="profileBio" id="profileBio">
-                <p>Add a bio in settings. Share your undertone and favorite looks!</p>
-              </div>
-              <div class="profileStats" id="profileStats">
-                <div class="profileStat"><strong>0</strong><span>Posts</span></div>
-                <div class="profileStat"><strong>0</strong><span>Followers</span></div>
-                <div class="profileStat"><strong>0</strong><span>Following</span></div>
-              </div>
-              <div class="profileActions">
-                <a href="/scanner.html" class="profileBtn" id="profileFaceScanner">Face Scanner</a>
-                <a href="#" class="profileBtn secondary">Edit profile</a>
-                <a href="/login.html" class="profileBtn secondary" id="profileLogout">Log out</a>
-              </div>
+                <div class="profileStats" id="profileStats">
+                  <div class="profileStat"><strong id="profileStatFollowing">0</strong><span>Following</span></div>
+                  <div class="profileStat"><strong id="profileStatFollowers">0</strong><span>Followers</span></div>
+                  <div class="profileStat"><strong id="profileStatPosts">0</strong><span>Posts</span></div>
+                </div>
+              </header>
               <section class="profileSection" id="profileBeautyReportSection">
                 <h2 class="sectionTitle">Beauty Report</h2>
+                <p class="beautyReportUpdatedBanner" id="beautyReportUpdatedBanner" hidden>Beauty report updated — <a href="/beauty-report.html" id="beautyReportSeeMore">see more</a></p>
                 <div class="beautyReportCard" id="profileBeautyReport">
-                  <div class="hint">No report yet. Use Face Scanner and click Analyze to create one.</div>
+                  <div class="hint">No report yet. Use Face Scanner to create one.</div>
                 </div>
+                <p class="beautyReportSeeMoreWrap" id="beautyReportSeeMoreWrap" hidden>
+                  <a href="/beauty-report.html" class="beautyReportSeeMoreBtn" id="beautyReportSeeMoreBtn">See more</a>
+                </p>
               </section>
-              <section class="profileSection">
-                <h2 class="sectionTitle">My looks</h2>
-                <div class="profileLooksGrid" id="profileLooksGrid">
-                  <div class="profileLookThumb" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);"></div>
-                  <div class="profileLookThumb" style="background: linear-gradient(135deg, #e8d5ff, #d5e8ff);"></div>
-                  <div class="profileLookThumb" style="background: linear-gradient(135deg, #e8fff3, #fff0e8);"></div>
-                </div>
+              <section class="profileSection profileLooksSection">
+                <div class="profileLooksGrid" id="profileLooksGrid"></div>
               </section>
+              <p class="profileLogoutWrap">
+                <a href="/login.html" class="profileLogoutLink" id="profileLogout">Log out</a>
+              </p>
             </div>
           </div>
 

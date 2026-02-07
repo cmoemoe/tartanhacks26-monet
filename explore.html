@@ -34,14 +34,25 @@
                 <h1>Explore</h1>
                 <p class="sub">Discover looks and trends from the community.</p>
               </header> -->
-              <div class="exploreSearch">
-                <input type="search" placeholder="Search looks, shades, tutorials..." class="searchInput" id="searchInput" />
-              </div>
+              <form class="exploreSearch" id="exploreSearchForm" role="search">
+                <div class="exploreSearchWrap">
+                  <input type="search" placeholder="Search looks, shades, tutorials..." class="searchInput" id="searchInput" name="q" autocomplete="off" />
+                  <span class="exploreSearchIcon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </span>
+                </div>
+              </form>
+              <section class="exploreSearchResults" id="exploreSearchResults" aria-live="polite" hidden>
+                <h2 class="exploreSearchResultsTitle" id="exploreSearchResultsTitle">Search results</h2>
+                <div class="feedList feedListPins" id="exploreSearchResultsList"></div>
+              </section>
               <div class="exploreAi" id="aiResponseCard">
-                <h3 class="exploreAiTitle" id="askAiTitle">Ask AI</h3>
+                <h3 class="exploreAiTitle" id="askAiTitle">Monet Beauty Assistant</h3>
                 <form class="exploreAiForm" id="askAiForm">
                   <input type="text" id="askAiInput" placeholder="e.g. Best lipstick for warm undertone?" class="searchInput" />
-                  <button type="submit" class="askAiBtn" id="askAiSubmit">Ask AI</button>
+                  <button type="submit" class="askAiBtn" id="askAiSubmit" aria-label="Send">
+                    <svg class="askAiBtnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
                 </form>
                 <div class="exploreAiPrompts">
                   <p class="exploreAiPromptsLabel">For you</p>
@@ -57,20 +68,11 @@
                 </div>
                 <div class="exploreAiResponse" id="aiResponse"></div>
               </div>
-              <div class="exploreCategories">
-                <button type="button" class="chip active">All</button>
-                <button type="button" class="chip">Everyday</button>
-                <button type="button" class="chip">Glam</button>
-                <button type="button" class="chip">Tutorials</button>
-                <button type="button" class="chip">Undertone</button>
-              </div>
-              <section class="exploreGrid">
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);"></div><span class="exploreCardLabel">Warm everyday</span></div>
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #e8d5ff, #d5e8ff);"></div><span class="exploreCardLabel">Cool glam</span></div>
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #fff0e8, #e8fff3);"></div><span class="exploreCardLabel">Neutral look</span></div>
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #e8f0d5, #ffe8e8);"></div><span class="exploreCardLabel">Olive tones</span></div>
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #d8e8ff, #ffd6e8);"></div><span class="exploreCardLabel">Tutorial</span></div>
-                <div class="exploreCard"><div class="exploreCardImg" style="background: linear-gradient(135deg, #e8fff3, #ffd6e8);"></div><span class="exploreCardLabel">Shade match</span></div>
+              <section class="feedSection" id="exploreFeedSection">
+                <h2 class="exploreFeedTitle">Trending</h2>
+                <div class="feedList feedListPins" id="exploreFeedList">
+                  <div class="hint">Loading feed…</div>
+                </div>
               </section>
             </div>
           </div>

@@ -33,60 +33,59 @@
           </div>
 
           <div class="pageContent">
-            <div class="app appPage">
-              <!-- <header>
-                <div class="topbar">
-                  <a href="/profile.html" class="backLink" id="backLink">← Profile</a>
-                  <h1>Face Scanner</h1>
-                </div>
-                <p class="sub">Tip: face a window / even lighting for better undertone detection.</p>
-              </header> -->
+            <div class="app appPage scannerStepsWrap">
+              <a href="/profile.html" class="scannerReturnBtn" id="scannerReturnBtn" aria-label="Return to profile">&larr; Profile</a>
 
-              <main class="grid">
-                <section class="cameraCard">
-                  <div class="stage">
+              <main class="scannerSteps" id="scannerSteps">
+                <!-- Step 1: Get ready (camera opens immediately here) -->
+                <section class="scannerStep scannerStepGetReady active" id="scannerStep1" data-step="1">
+                  <h1 class="scannerStepTitle">Get ready for your video selfie</h1>
+                  <div class="scannerFrame scannerFramePlaceholder scannerFrameLive" id="scannerFramePlaceholder">
+                    <span class="scannerFrameInner"></span>
+                    <svg class="scannerFaceOval" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                      <ellipse cx="50" cy="50" rx="38" ry="48" fill="none" stroke="rgba(180,232,221,0.7)" stroke-width="2"/>
+                    </svg>
                     <video id="video" playsinline autoplay muted></video>
                     <canvas id="overlay"></canvas>
                   </div>
-                  <div class="controls">
-                    <button id="btnStart">Start Camera</button>
-                    <button id="btnAnalyze" disabled>Analyze</button>
-                    <button id="btnStop" disabled>Stop</button>
-                  </div>
-                  <div class="status" id="status">Ready.</div>
+                  <p class="scannerStepHint">Frame your face in the oval</p>
+                  <button type="button" class="scannerBtn scannerBtnGradient" id="btnGetStarted">Get started</button>
+                  <p class="scannerMonet">Monet</p>
                 </section>
 
-                <section class="resultsCard">
-                  <h2>Results</h2>
-                  <div class="row">
-                    <div>
-                      <div class="label">Undertone</div>
-                      <div class="value" id="undertone">—</div>
-                    </div>
-                    <div>
-                      <div class="label">Confidence</div>
-                      <div class="value" id="confidence">—</div>
-                    </div>
+                <!-- Step 2: Scanning (same camera, moved to this frame by JS) -->
+                <section class="scannerStep scannerStepScanning" id="scannerStep2" data-step="2">
+                  <div class="scannerFrame scannerFrameLive" id="scannerFrameLive"></div>
+                  <p class="scannerStepHint" id="scanningHint">Move closer</p>
+                  <div class="scannerScanningBar" id="scannerScanningBar" role="status">Scanning...</div>
+                  <p class="scannerMonet">Monet</p>
+                </section>
+
+                <!-- Step 3: Analyzing -->
+                <section class="scannerStep scannerStepAnalyzing" id="scannerStep3" data-step="3">
+                  <div class="scannerAnalyzingCircle" id="scannerAnalyzingCircle"></div>
+                  <p class="scannerAnalyzingText">Analyzing<br>encrypted 3D face<br>scan</p>
+                  <div class="scannerProgressWrap">
+                    <div class="scannerProgressBar" id="scannerProgressBar"></div>
                   </div>
-                  <div class="row">
-                    <div>
-                      <div class="label">Face shape</div>
-                      <div class="value" id="faceShape">—</div>
-                    </div>
-                    <div>
-                      <div class="label">Lip fullness</div>
-                      <div class="value" id="lipFullness">—</div>
-                    </div>
+                  <p class="scannerMonet">Monet</p>
+                </section>
+
+                <!-- Step 4: Complete -->
+                <section class="scannerStep scannerStepComplete" id="scannerStep4" data-step="4">
+                  <div class="scannerCompleteCircle" id="scannerCompleteCircle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
-                  <div class="row">
-                    <div>
-                      <div class="label">Sampled Skin</div>
-                      <div class="swatch" id="skinSwatch"></div>
-                    </div>
-                  </div>
-                  <div class="looks" id="looks">
-                    <div class="hint">Click Analyze to generate recommendations and save to your profile.</div>
-                  </div>
+                  <p class="scannerCompleteText">Completed!</p>
+                  <p class="scannerMonet">Monet</p>
+                  <button type="button" class="scannerBtn scannerBtnGradient" id="btnViewResults">View results</button>
+                </section>
+
+                <!-- Step 5: Go to Monet (homepage) -->
+                <section class="scannerStep scannerStepComplete scannerStepGoToMonet" id="scannerStep5" data-step="5">
+                  <p class="scannerCompleteText">Your report is ready.</p>
+                  <p class="scannerMonet">Monet</p>
+                  <a href="/index.html" class="scannerBtn scannerBtnGradient" id="btnGoToMonet">Go to Monet</a>
                 </section>
               </main>
             </div>

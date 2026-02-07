@@ -46,7 +46,7 @@ loginForm.addEventListener("submit", async (e) => {
 
   if (!isSupabaseConfigured()) {
     sessionStorage.setItem("beautyLoggedIn", "true");
-    window.location.href = "/index.html";
+    window.location.href = "/survey.html?fromLogin=1";
     return;
   }
 
@@ -86,11 +86,8 @@ loginForm.addEventListener("submit", async (e) => {
       }
     }
     sessionStorage.setItem("beautyLoggedIn", "true");
-    if (isSignUp) {
-      window.location.href = "/survey.html";
-    } else {
-      window.location.href = "/index.html";
-    }
+    // Every login (and sign up) → survey → facial scan
+    window.location.href = "/survey.html?fromLogin=1";
   } catch (err) {
     setHint(err.message || "Something went wrong.");
     loginSubmit.disabled = false;

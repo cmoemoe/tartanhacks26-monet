@@ -1,11 +1,13 @@
-import { supabase, isSupabaseConfigured } from "./lib/supabase.js";
+import { isSupabaseConfigured } from "./lib/supabase.js";
 import { getSession, signOut } from "./lib/auth.js";
-import { fetchProfile, fetchUserPosts } from "./lib/posts.js";
+import { fetchProfile, fetchUserPosts, deletePost } from "./lib/posts.js";
 
-const profileAvatar = document.getElementById("profileAvatar");
-const profileInfo = document.getElementById("profileInfo");
-const profileBio = document.getElementById("profileBio");
-const profileStats = document.getElementById("profileStats");
+const profileName = document.getElementById("profileName");
+const profileHandle = document.getElementById("profileHandle");
+const profileBanner = document.getElementById("profileBanner");
+const profileStatFollowing = document.getElementById("profileStatFollowing");
+const profileStatFollowers = document.getElementById("profileStatFollowers");
+const profileStatPosts = document.getElementById("profileStatPosts");
 const profileLooksGrid = document.getElementById("profileLooksGrid");
 const profileBeautyReport = document.getElementById("profileBeautyReport");
 const profileLogout = document.getElementById("profileLogout");
@@ -20,11 +22,8 @@ async function loadProfile() {
   const session = await checkAuth();
   const userId = session?.user?.id;
   if (!userId && !isSupabaseConfigured()) {
-    if (profileInfo) profileInfo.querySelector("h1").textContent = "Your profile";
-    if (profileStats) {
-      const postsEl = profileStats.querySelector(".profileStat strong");
-      if (postsEl) postsEl.textContent = "0";
-    }
+    if (profileName) profileName.textContent = "Your profile";
+    if (profileStatPosts) profileStatPosts.textContent = "0";
     return;
   }
   if (!userId) return;
@@ -35,23 +34,21 @@ async function loadProfile() {
 
   if (profile) {
     const name = profile.full_name || profile.username || "Your profile";
-    if (profileAvatar) {
-      profileAvatar.textContent = name.charAt(0).toUpperCase();
-      profileAvatar.style.background = "linear-gradient(135deg, #ffd6e8, #d8e8ff)";
+    const handle = profile.username ? `@${profile.username}` : "";
+    if (profileName) profileName.textContent = name;
+    if (profileHandle) profileHandle.textContent = handle || "@username";
+    if (profileBanner) {
+      if (profile.avatar_url) {
+        profileBanner.style.backgroundImage = `url(${profile.avatar_url})`;
+        profileBanner.style.backgroundSize = "cover";
+        profileBanner.style.backgroundPosition = "center";
+      } else {
+        profileBanner.style.background = "linear-gradient(135deg, #e8d5d5 0%, #d5d5e8 50%, #d5e8e0 100%)";
+      }
     }
-    if (profileInfo) {
-      profileInfo.querySelector("h1").textContent = name;
-      profileInfo.querySelector(".sub").textContent =
-        (profile.undertone ? `Undertone: ${profile.undertone}` : "Undertone: Not set") +
-        (profile.username ? ` · @${profile.username}` : "");
-    }
-    if (profileBio) profileBio.querySelector("p").textContent = profile.bio || "Add a bio in settings. Share your undertone and favorite looks!";
-    if (profileStats) {
-      const statEls = profileStats.querySelectorAll(".profileStat");
-      if (statEls[0]) statEls[0].querySelector("strong").textContent = String(postCount);
-      if (statEls[1]) statEls[1].querySelector("strong").textContent = String(profile.followers_count ?? 0);
-      if (statEls[2]) statEls[2].querySelector("strong").textContent = String(profile.following_count ?? 0);
-    }
+    if (profileStatFollowing) profileStatFollowing.textContent = String(profile.following_count ?? 0);
+    if (profileStatFollowers) profileStatFollowers.textContent = formatCount(profile.followers_count ?? 0);
+    if (profileStatPosts) profileStatPosts.textContent = String(postCount);
   }
 
   if (profileLooksGrid) {
@@ -73,16 +70,34 @@ async function loadProfile() {
             const url = p.image_url || p.media_urls?.[0];
             if (url) style = `background-image: url('${escapeHtml(url)}'); background-size: cover; background-position: center;`;
           }
-          return `<div class="profileLookThumb" style="${style}">${extra}</div>`;
+          const title = getPostTitle(p.caption);
+          const views = p.likes_count != null ? `${formatCount(p.likes_count)} views` : "0 views";
+          const overlay = `<div class="profileLookOverlay"><span class="profileLookOverlayTitle">${escapeHtml(title)}</span><span class="profileLookOverlayMeta">${escapeHtml(views)}</span></div>`;
+          return `<div class="profileLookThumbWrap"><a href="/post.html?id=${escapeHtml(p.id)}" class="profileLookThumbLink"><div class="profileLookThumb" style="${style}">${extra}${overlay}</div></a><button type="button" class="profileLookDelete" data-post-id="${escapeHtml(p.id)}" aria-label="Delete post">×</button></div>`;
         })
         .join("");
+      profileLooksGrid.querySelectorAll(".profileLookDelete").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-post-id");
+          if (!id || !confirm("Delete this post?")) return;
+          const { error } = await deletePost(id);
+          if (error) alert(error);
+          else loadProfile();
+        });
+      });
     }
   }
+
+  const reportUpdated = new URLSearchParams(window.location.search).get("reportUpdated") === "1";
+  const bannerEl = document.getElementById("beautyReportUpdatedBanner");
+  const seeMoreWrapEl = document.getElementById("beautyReportSeeMoreWrap");
+  if (bannerEl) bannerEl.hidden = !reportUpdated;
 
   if (profileBeautyReport) {
     const report = profile?.beauty_report;
     if (!report) {
-      profileBeautyReport.innerHTML = '<div class="hint">No report yet. Use Face Scanner and click Analyze to create one.</div>';
+      profileBeautyReport.innerHTML = '<div class="hint">No report yet. Use Face Scanner to create one.</div>';
+      if (seeMoreWrapEl) seeMoreWrapEl.hidden = true;
       return;
     }
     const u = report.undertone ? report.undertone.charAt(0).toUpperCase() + report.undertone.slice(1) : "—";
@@ -123,11 +138,26 @@ async function loadProfile() {
         ${updated ? `<p class="beautyReportUpdated">Last updated: ${escapeHtml(updated)}</p>` : ""}
       </div>
     `;
+    if (seeMoreWrapEl) seeMoreWrapEl.hidden = false;
   }
 }
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+}
+
+function getPostTitle(caption) {
+  if (!caption || typeof caption !== "string") return "Look";
+  const words = caption.trim().split(/\s+/).slice(0, 4);
+  const raw = words.join(" ").replace(/[.,!?;:]$/, "");
+  return raw || "Look";
+}
+
+function formatCount(n) {
+  const num = Number(n);
+  if (num >= 1e6) return `${(num / 1e6).toFixed(1).replace(/\.0$/, "")}M`;
+  if (num >= 1e3) return `${(num / 1e3).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(num);
 }
 
 profileLogout?.addEventListener("click", async (e) => {

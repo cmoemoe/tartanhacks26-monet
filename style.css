@@ -94,6 +94,264 @@ header h1 {
 }
 
 /* Mobile stack layout */
+.scannerReturnBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scannerReturnBtn:hover {
+  background: #fff;
+}
+
+/* ---------- Face Scanner steps (Figma: Get ready → Scanning → Analyzing → Complete) ---------- */
+.scannerStepsWrap {
+  background: #fff;
+}
+
+.scannerSteps {
+  position: relative;
+  min-height: 60vh;
+}
+
+.scannerStep {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 20px 24px;
+  animation: scannerStepIn 0.35s ease-out;
+}
+
+.scannerStep.active {
+  display: flex;
+}
+
+@keyframes scannerStepIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scannerStepTitle {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.3;
+  max-width: 280px;
+}
+
+.scannerFrame {
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 3 / 4;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.scannerFramePlaceholder {
+  background: linear-gradient(#fff8fa, #fff8fa) padding-box, linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%) border-box;
+  border: 2px solid transparent;
+  border-radius: 24px;
+}
+
+.scannerFramePlaceholder .scannerFrameInner {
+  display: block;
+  position: absolute;
+  inset: 4px;
+  border-radius: 20px;
+  background: #fff8fa;
+}
+
+.scannerFaceOval {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  margin: auto;
+  pointer-events: none;
+  color: rgba(180, 232, 221, 0.85);
+}
+
+.scannerFramePlaceholder .scannerFaceOval ellipse {
+  stroke: currentColor;
+}
+
+.scannerFrameLive {
+  background: #fff8fa;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow: inset 0 0 0 2px transparent;
+  border-radius: 24px;
+  background-image: linear-gradient(#fff8fa, #fff8fa), linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.scannerFrame video,
+.scannerFrame canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 22px;
+}
+
+.scannerFramePlaceholder.scannerFrameLive .scannerFrameInner {
+  display: none;
+}
+
+.scannerFramePlaceholder.scannerFrameLive .scannerFaceOval {
+  z-index: 1;
+}
+
+.scannerStepHint {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+}
+
+.scannerBtn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.06s;
+}
+
+.scannerBtn:active { transform: scale(0.98); }
+
+.scannerBtnGradient {
+  background: linear-gradient(90deg, #87dbb0 0%, #b496e8 100%);
+  color: #fff;
+  min-width: 200px;
+}
+
+.scannerBtnGradient:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.scannerBtnSecondary {
+  background: rgba(0,0,0,0.06);
+  color: #333;
+  margin-top: 8px;
+}
+
+.scannerScanningBar {
+  width: 100%;
+  max-width: 280px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #87dbb0 0%, #b496e8 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+
+.scannerMonet {
+  margin: auto 0 0 0;
+  padding-top: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Step 3: Analyzing */
+.scannerAnalyzingCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.scannerAnalyzingText {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.5;
+}
+
+.scannerProgressWrap {
+  width: 100%;
+  max-width: 280px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e8e8e8;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.scannerProgressBar {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #87dbb0 0%, #b496e8 100%);
+  transition: width 0.25s ease-out;
+}
+
+/* Step 4: Complete */
+.scannerCompleteCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.scannerCompleteCircle svg {
+  width: 48px;
+  height: 48px;
+  color: #fff;
+  stroke-width: 3;
+}
+
+.scannerCompleteText {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.scannerStepComplete .scannerBtnGradient {
+  margin-top: 16px;
+}
+
+.scannerResultsCard {
+  margin-top: 20px;
+  padding: 14px;
+}
+
 .grid {
   display: flex;
   flex-direction: column;
@@ -298,10 +556,17 @@ footer {
   min-height: 0;
 }
 
-/* Feed header: For You | Following (wireframe) */
+/* Feed header: For You | Following (wireframe) — sticky so tabs stay in place when scrolling */
 .feedHeader {
+  position: sticky;
+  top: 0;
+  z-index: 15;
   flex-shrink: 0;
   padding: 6px 10px 10px;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .feedHeader .feedTabsWrap {
@@ -390,15 +655,15 @@ footer {
   gap: 16px;
 }
 
+/* 2-column masonry: items flow top-to-bottom in each column, no vertical gap */
 .feedListPins {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  align-content: start;
+  display: block; /* override .feedList flex so column-count works */
+  column-count: 2;
+  column-gap: 6px;
 }
 
 .feedListPins > .hint {
-  grid-column: 1 / -1;
+  column-span: all;
   padding: 24px 12px;
   text-align: center;
   color: var(--muted);
@@ -408,6 +673,7 @@ footer {
   break-inside: avoid;
   overflow: hidden;
   background: #fff;
+  margin-bottom: 0;
 }
 
 .feedPinThumbWrap {
@@ -491,10 +757,10 @@ footer {
 
 .feedPinBlog,
 .feedPinPlaceholder {
-  min-height: 100px;
-  padding: 12px;
+  min-height: 0;
+  padding: 6px 8px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   background: linear-gradient(135deg, #fef2f8, #f0f9ff);
 }
 
@@ -504,13 +770,19 @@ footer {
 
 .feedPinBlogBody {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 11px;
+  line-height: 1.35;
   color: var(--text);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 12;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.feedPinLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .feedPinTitle {
@@ -892,6 +1164,17 @@ footer {
   padding-bottom: 12px;
 }
 
+/* Profile page: do not extend header into status bar (avoids cutting off banner) */
+.phoneScreen .pageContent .app.profilePageFigma header {
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
 /* Optional: subtle "home indicator" (hidden when bottom nav is present) */
 .phoneScreen::after {
   content: "";
@@ -1092,8 +1375,9 @@ footer {
 }
 
 .surveyChip:has(input:checked) {
-  border-color: var(--accent);
-  background: rgba(184, 77, 111, 0.12);
+  border-color: transparent;
+  background: linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  box-shadow: 0 2px 8px rgba(135, 219, 176, 0.25);
 }
 
 .surveyChipLabel {
@@ -1115,7 +1399,7 @@ footer {
   cursor: pointer;
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.6);
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
   border: 1px solid var(--border);
 }
 
@@ -1134,9 +1418,12 @@ footer {
   padding: 16px;
   font-size: 16px;
   font-weight: 800;
-  background: linear-gradient(180deg, #ffffff, #f0f2f7);
+  background: linear-gradient(135deg, #c4b5fd 0%, #6ee7b7 100%);
+  color: #fff;
+  border: none;
   cursor: pointer;
   margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(110, 231, 183, 0.35);
 }
 
 .surveyError {
@@ -1341,10 +1628,11 @@ footer {
   padding: 14px;
   font-size: 16px;
   font-weight: 800;
-  background: var(--accent);
+  background: linear-gradient(135deg, #c4b5fd 0%, #6ee7b7 100%);
   color: #fff;
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(110, 231, 183, 0.35);
 }
 
 .prefsModalSave:hover {
@@ -1373,6 +1661,53 @@ footer {
   margin-bottom: 14px;
 }
 
+.exploreSearchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.exploreSearchWrap .searchInput {
+  flex: 1;
+  min-width: 0;
+  padding-right: 44px;
+}
+
+.exploreSearchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exploreSearchIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.exploreSearchResults {
+  margin-bottom: 18px;
+}
+
+.exploreSearchResultsTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.exploreFeedTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
 .searchInput {
   width: 100%;
   appearance: none;
@@ -1389,7 +1724,7 @@ footer {
 }
 
 .exploreAi {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   padding: 14px;
   border-radius: 16px;
   background: linear-gradient(180deg, var(--glass), var(--glass2));
@@ -1418,10 +1753,19 @@ footer {
 
 .askAiBtn {
   flex-shrink: 0;
-  padding: 12px 16px;
+  padding: 12px 14px;
   border-radius: 14px;
   font-weight: 700;
   font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.askAiBtnIcon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .exploreAiPrompts {
@@ -1634,9 +1978,10 @@ footer {
 }
 
 .uploadTypeTab.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(135, 219, 176, 0.25);
 }
 
 .uploadZoneWrap {
@@ -1819,6 +2164,15 @@ footer {
   font-size: 16px;
   font-weight: 800;
   margin-top: 8px;
+  background: linear-gradient(135deg, #c4b5fd 0%, #6ee7b7 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(110, 231, 183, 0.35);
+}
+
+.uploadSubmit:hover {
+  filter: brightness(1.05);
 }
 
 /* Messages / Communities page */
@@ -2028,6 +2382,215 @@ footer {
   color: var(--muted);
 }
 
+/* ---------- Profile page (Figma frame: banner, name, handle, Edit Profile + scanner, stats, chips, 2-col grid) ---------- */
+/* Unfix header: scroll with page, no frosted glass; reset negative margin so banner isn't cut off */
+.profilePageFigma .profileFigmaHeader,
+.profilePageFigma header.profileFigmaHeader {
+  position: static;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  text-align: center;
+  margin-bottom: 12px;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.profilePageFigma .profileBanner {
+  width: 100%;
+  height: 160px;
+  max-height: 160px;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #e8d5d5 0%, #d5d5e8 50%, #d5e8e0 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.profilePageFigma .profileName {
+  margin: 0 0 2px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profilePageFigma .profileHandle {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.profilePageFigma .profileActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 0;
+  border: none;
+}
+
+.profilePageFigma .profileBtnEdit {
+  flex: 1;
+  max-width: 200px;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #e8e8e8;
+  color: #333;
+  border: none;
+}
+
+.profilePageFigma .profileBtnEdit:hover {
+  background: #ddd;
+}
+
+.profilePageFigma .profileBtnScanner {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: #e8e8e8;
+  color: #333;
+  border: none;
+}
+
+.profilePageFigma .profileBtnScanner:hover {
+  background: #ddd;
+}
+
+.profilePageFigma .scannerIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.profilePageFigma .profileStats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  border: none;
+  padding: 0 0 6px 0;
+  margin-bottom: 6px;
+}
+
+.profilePageFigma .profileStat {
+  align-items: center;
+  gap: 0;
+}
+
+.profilePageFigma .profileStat strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.profilePageFigma .profileStat span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.profileFilterChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 0 16px 0;
+  margin-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.profileFilterChips::-webkit-scrollbar {
+  display: none;
+}
+
+.profileFilterChip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  background: #e8e8e8;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.profileFilterChip:hover {
+  background: #ddd;
+}
+
+.profileFilterChip.active {
+  background: #111;
+  color: #fff;
+}
+
+.profilePageFigma .profileLooksGrid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.profilePageFigma .profileLookThumbWrap {
+  position: relative;
+}
+
+.profilePageFigma .profileLookThumb {
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profilePageFigma .profileLookOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 10px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  color: #fff;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.profilePageFigma .profileLookOverlayTitle {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.profilePageFigma .profileLookOverlayMeta {
+  opacity: 0.9;
+  font-size: 12px;
+}
+
+.profilePageFigma .profileLogoutWrap {
+  margin: 24px 0 0 0;
+  text-align: center;
+}
+
+.profilePageFigma .profileLogoutLink {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.profilePageFigma .profileLogoutLink:hover {
+  text-decoration: underline;
+}
+
 .profileSection {
   margin-top: 8px;
 }
@@ -2038,6 +2601,121 @@ footer {
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 12px;
+}
+
+/* Profile page: compact beauty report */
+.profilePageFigma .beautyReportCard {
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.profilePageFigma .beautyReportCard .hint {
+  font-size: 11px;
+  margin: 0;
+}
+
+.beautyReportUpdatedBanner {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.beautyReportUpdatedBanner a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.beautyReportUpdatedBanner a:hover {
+  text-decoration: underline;
+}
+
+.beautyReportSeeMoreWrap {
+  margin: 10px 0 0 0;
+}
+
+.beautyReportSeeMoreBtn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #87dbb0 0%, #b496e8 100%);
+  text-decoration: none;
+}
+
+.beautyReportSeeMoreBtn:hover {
+  opacity: 0.95;
+}
+
+/* Full beauty report page */
+.beautyReportPageTitle {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.beautyReportPage .beautyReportPageCard {
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 12px;
+}
+
+.beautyReportPageGrid .beautyReportRow {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.beautyReportPageGrid .label {
+  font-size: 12px;
+}
+
+.beautyReportPageGrid .value {
+  font-size: 15px;
+}
+
+.beautyReportPageGrid .beautyReportSwatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.profilePageFigma .beautyReportGrid {
+  gap: 4px;
+}
+
+.profilePageFigma .beautyReportRow {
+  gap: 8px;
+  font-size: 12px;
+}
+
+.profilePageFigma .beautyReportRow .label {
+  font-size: 11px;
+}
+
+.profilePageFigma .beautyReportRow .value {
+  font-size: 12px;
+}
+
+.profilePageFigma .beautyReportSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.profilePageFigma .beautyReportUpdated {
+  margin: 4px 0 0 0;
+  font-size: 10px;
+}
+
+.profilePageFigma #profileBeautyReportSection .sectionTitle {
+  font-size: 15px;
+  margin-bottom: 6px;
 }
 
 .beautyReportGrid {
@@ -2078,10 +2756,111 @@ footer {
   color: var(--muted);
 }
 
+/* Beauty report: daily makeup color recommendations */
+.beautyReportRecommendations {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.beautyReportRecommendationsTitle {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.beautyReportLook {
+  margin-bottom: 20px;
+}
+
+.beautyReportLook:last-child {
+  margin-bottom: 0;
+}
+
+.beautyReportLookTitle {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  background: linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.beautyReportStep {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.beautyReportStepInstruction {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.beautyReportStepCategory {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.beautyReportShades {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.beautyReportShade {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.beautyReportShadeSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.beautyReportShadeName {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 100px;
+}
+
+.beautyReportShadeReason {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .profileLooksGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+}
+
+.profileLookThumbWrap {
+  position: relative;
+}
+
+.profileLookThumbLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .profileLookThumb {
@@ -2093,6 +2872,30 @@ footer {
   justify-content: center;
 }
 
+.profileLookDelete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.profileLookDelete:hover {
+  background: rgba(180,0,0,0.8);
+}
+
 .profileLookThumbPlay,
 .profileLookThumbBlog {
   font-size: 24px;
@@ -2101,6 +2904,240 @@ footer {
 }
 
 .profileLookThumbBlog {
+  color: var(--muted);
+}
+
+/* ---------- Post details page (Figma: media card, details card, products, similar) ---------- */
+.postDetailsPage .postDetailsMain {
+  padding-bottom: 24px;
+}
+
+.postDetailsBack {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+}
+
+.postDetailsBack:hover {
+  background: linear-gradient(135deg, #b4e8dd 0%, #e8ddf1 100%);
+  border-color: transparent;
+}
+
+.postDetailsMediaCard {
+  background: var(--card);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.postDetailsMediaWrap {
+  width: 100%;
+  min-height: 200px;
+  background: var(--bg2);
+}
+
+.postDetailsVideoWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  background-size: cover;
+  background-position: center;
+}
+
+.postDetailsVideo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.postDetailsImg {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+}
+
+.postDetailsBlog {
+  padding: 16px;
+  min-height: 80px;
+}
+
+.postDetailsBlogBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.postDetailsInfoCard {
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.postDetailsTitle {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.postDetailsDescriptionBox {
+  background: var(--bg2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+
+.postDetailsDescription {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.postDetailsTags {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.postDetailsSection {
+  margin-bottom: 20px;
+}
+
+.postDetailsSectionTitle {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.postDetailsProductsScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.postDetailsProductsScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.postDetailsProductCard {
+  flex: 0 0 140px;
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 10px;
+  position: relative;
+}
+
+.postDetailsProductImgWrap {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--bg2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+
+.postDetailsProductPlaceholder {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.postDetailsProductRating {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #87dbb0 0%, #b496e8 100%);
+  border: none;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.postDetailsProductName,
+.postDetailsProductPrice {
+  display: block;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.postDetailsProductPrice {
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.postDetailsSimilarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.postDetailsSimilarThumb {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+}
+
+.postDetailsSimilarThumb .postDetailsSimilarTitle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.postDetailsSimilarPlay,
+.postDetailsSimilarBlog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: rgba(255,255,255,0.9);
+}
+
+.postDetailsSimilarBlog {
   color: var(--muted);
 }
 

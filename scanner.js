@@ -4,6 +4,7 @@ import { updateBeautyReport } from "./lib/posts.js";
 import { updatePreferences } from "./lib/preferences.js";
 import { getFaceGeometry, classifyFaceShape, classifyLipFullness } from "./lib/face-geometry.js";
 import { isFaceApiConfigured, analyzeFrameWithBackend } from "./lib/face-api.js";
+import { recommend } from "./lib/recommend.js";
 
 async function ensureAuth() {
   const session = await getSession();
@@ -13,26 +14,20 @@ async function ensureAuth() {
 
 ensureAuth();
 
-document.getElementById("backLink")?.addEventListener("click", (e) => {
+document.getElementById("scannerReturnBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
   window.location.href = "/profile.html";
 });
 
 const video = document.getElementById("video");
 const overlay = document.getElementById("overlay");
-const ctx = overlay.getContext("2d", { willReadFrequently: true });
+const ctx = overlay ? overlay.getContext("2d", { willReadFrequently: true }) : null;
 
-const btnStart = document.getElementById("btnStart");
-const btnAnalyze = document.getElementById("btnAnalyze");
-const btnStop = document.getElementById("btnStop");
-const statusEl = document.getElementById("status");
-
-const undertoneEl = document.getElementById("undertone");
-const confidenceEl = document.getElementById("confidence");
-const skinSwatchEl = document.getElementById("skinSwatch");
-const faceShapeEl = document.getElementById("faceShape");
-const lipFullnessEl = document.getElementById("lipFullness");
-const looksEl = document.getElementById("looks");
+const btnGetStarted = document.getElementById("btnGetStarted");
+const scannerScanningBar = document.getElementById("scannerScanningBar");
+const progressBarEl = document.getElementById("scannerProgressBar");
+const scannerFramePlaceholder = document.getElementById("scannerFramePlaceholder");
+const scannerFrameLive = document.getElementById("scannerFrameLive");
 
 const SAMPLE_POINTS = [234, 454, 10];
 
@@ -40,47 +35,29 @@ let faceMesh = null;
 let camera = null;
 let latestResults = null;
 
-// Recommendation engine (same as original main.js)
-function shade(name, color, reason) {
-  return { id: crypto.randomUUID(), name, color, reason };
-}
-function rgb(r, g, b) {
-  return { r, g, b };
-}
-
-const palettes = {
-  warm: {
-    lipstick: [shade("Peach Nude", rgb(0.86, 0.55, 0.44), "Plays up warm/yellow tones."), shade("Terracotta", rgb(0.72, 0.32, 0.24), "Warm earthy flattering."), shade("Warm Rose", rgb(0.80, 0.38, 0.46), "Balanced warm pink.")],
-    blush: [shade("Apricot", rgb(0.92, 0.55, 0.36), "Brightens warm undertones."), shade("Peach", rgb(0.95, 0.62, 0.55), "Natural warm flush.")],
-    eyeshadow: [shade("Bronze", rgb(0.55, 0.39, 0.24), "Warm metallic pop."), shade("Copper", rgb(0.72, 0.36, 0.22), "Enhances warmth."), shade("Olive Gold", rgb(0.46, 0.45, 0.22), "Soft warm glam.")],
-  },
-  cool: {
-    lipstick: [shade("Mauve", rgb(0.67, 0.42, 0.55), "Cool pink-purple harmony."), shade("Berry", rgb(0.55, 0.20, 0.35), "Bold cool flattering."), shade("Blue-Red", rgb(0.72, 0.10, 0.22), "Classic cool red.")],
-    blush: [shade("Cool Pink", rgb(0.92, 0.50, 0.65), "Fresh on cool undertones."), shade("Berry Blush", rgb(0.75, 0.30, 0.45), "Depth without turning orange.")],
-    eyeshadow: [shade("Taupe", rgb(0.52, 0.48, 0.45), "Cool neutral base."), shade("Mauve Smoke", rgb(0.55, 0.36, 0.48), "Cool-toned definition."), shade("Charcoal", rgb(0.22, 0.22, 0.25), "Deep cool contrast.")],
-  },
-  neutral: {
-    lipstick: [shade("Rose Nude", rgb(0.82, 0.46, 0.52), "Balanced and versatile."), shade("Classic Red", rgb(0.75, 0.14, 0.22), "Works across undertones."), shade("Pink Nude", rgb(0.90, 0.60, 0.66), "Soft everyday option.")],
-    blush: [shade("Soft Rose", rgb(0.90, 0.55, 0.62), "Neutral flush."), shade("Peach-Rose", rgb(0.92, 0.58, 0.54), "Between warm/cool.")],
-    eyeshadow: [shade("Champagne", rgb(0.78, 0.70, 0.54), "Easy lid highlight."), shade("Rose Gold", rgb(0.74, 0.52, 0.44), "Neutral glam."), shade("Soft Brown", rgb(0.45, 0.34, 0.28), "Universal crease.")],
-  },
-  olive: {
-    lipstick: [shade("Brick Rose", rgb(0.66, 0.24, 0.30), "Flattering muted warmth."), shade("Caramel Nude", rgb(0.75, 0.46, 0.34), "Avoids too-pink effect."), shade("Muted Berry", rgb(0.55, 0.26, 0.36), "Color without clashing.")],
-    blush: [shade("Muted Rose", rgb(0.80, 0.45, 0.52), "Olive-friendly flush."), shade("Mauve Peach", rgb(0.86, 0.52, 0.50), "Soft but not orange.")],
-    eyeshadow: [shade("Khaki", rgb(0.46, 0.45, 0.32), "Olive harmony."), shade("Bronze Brown", rgb(0.50, 0.36, 0.26), "Natural definition."), shade("Smoky Plum", rgb(0.43, 0.28, 0.38), "Olive-friendly drama.")],
-  },
-};
-
-function recommend(analysis) {
-  const u = analysis.undertone;
-  const p = palettes[u] || palettes.neutral;
-  const everyday = { id: `everyday-${u}`, title: "Everyday Look", intensity: "everyday", steps: [{ id: "lip", category: "lipstick", instruction: "Pick a comfy shade for daytime.", suggestedShades: p.lipstick.slice(0, 2) }, { id: "blush", category: "blush", instruction: "Apply lightly and blend upward for lift.", suggestedShades: p.blush }, { id: "shadow", category: "eyeshadow", instruction: "Use a soft base + a slightly deeper crease color.", suggestedShades: p.eyeshadow.slice(0, 2) }] };
-  const glam = { id: `glam-${u}`, title: "Glam Look", intensity: "glam", steps: [{ id: "lip-glam", category: "lipstick", instruction: "Choose a bolder shade and define the lip line.", suggestedShades: p.lipstick }, { id: "shadow-glam", category: "eyeshadow", instruction: "Add depth at outer corner + shimmer on lid.", suggestedShades: p.eyeshadow }] };
-  return { looks: [everyday, glam] };
-}
-
 function setStatus(text) {
-  statusEl.textContent = text;
+  // Status no longer shown in step UI; keep for any debug
+}
+
+function showStep(stepNum) {
+  document.querySelectorAll(".scannerStep").forEach((el) => el.classList.remove("active"));
+  const step = document.getElementById(`scannerStep${stepNum}`);
+  if (step) step.classList.add("active");
+  if (progressBarEl) progressBarEl.style.width = "0%";
+}
+
+function animateProgress(durationMs = 2000) {
+  if (!progressBarEl) return;
+  progressBarEl.style.width = "0%";
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const p = Math.min(1, elapsed / durationMs);
+    const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    progressBarEl.style.width = `${ease * 100}%`;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
 function capitalize(s) {
@@ -169,7 +146,9 @@ function analyzeCurrentFrame(landmarks) {
 }
 
 function resizeOverlay() {
+  if (!video || !overlay) return;
   const rect = video.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
   overlay.width = Math.floor(rect.width * (devicePixelRatio || 1));
   overlay.height = Math.floor(rect.height * (devicePixelRatio || 1));
 }
@@ -199,6 +178,7 @@ function drawGeometryContours(geometry, w) {
 }
 
 function drawOverlay(results) {
+  if (!ctx || !overlay) return;
   const w = overlay.width;
   const h = overlay.height;
   ctx.save();
@@ -229,75 +209,33 @@ function drawOverlay(results) {
   ctx.restore();
 }
 
-function renderAnalysis(analysis) {
-  undertoneEl.textContent = capitalize(analysis.undertone);
-  confidenceEl.textContent = `${Math.round(analysis.confidence * 100)}%`;
-  if (faceShapeEl) faceShapeEl.textContent = analysis.faceShape ? capitalize(analysis.faceShape.label) : "—";
-  if (lipFullnessEl) lipFullnessEl.textContent = analysis.lipFullness ? capitalize(analysis.lipFullness.label) : "—";
-  skinSwatchEl.style.background = `rgb(${Math.round(analysis.sampledSkinRGB.r * 255)}, ${Math.round(analysis.sampledSkinRGB.g * 255)}, ${Math.round(analysis.sampledSkinRGB.b * 255)})`;
-}
-
-function renderRecommendations(recs) {
-  looksEl.innerHTML = "";
-  for (const look of recs.looks) {
-    const lookDiv = document.createElement("div");
-    lookDiv.className = "look";
-    const title = document.createElement("div");
-    title.className = "lookTitle";
-    title.textContent = `${look.title} (${capitalize(look.intensity)})`;
-    lookDiv.appendChild(title);
-    for (const step of look.steps) {
-      const stepDiv = document.createElement("div");
-      stepDiv.className = "step";
-      const stepTitle = document.createElement("div");
-      stepTitle.className = "stepTitle";
-      stepTitle.textContent = capitalize(step.category);
-      stepDiv.appendChild(stepTitle);
-      const instr = document.createElement("div");
-      instr.className = "hint";
-      instr.textContent = step.instruction;
-      stepDiv.appendChild(instr);
-      const chips = document.createElement("div");
-      chips.className = "chips";
-      for (const s of step.suggestedShades) {
-        const chip = document.createElement("div");
-        chip.className = "chip";
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.style.background = `rgb(${Math.round(s.color.r * 255)}, ${Math.round(s.color.g * 255)}, ${Math.round(s.color.b * 255)})`;
-        const text = document.createElement("div");
-        text.innerHTML = `<div style="font-weight:800;font-size:12px">${escapeHtml(s.name)}</div><div style="color:#b8b8c6;font-size:11px">${escapeHtml(s.reason)}</div>`;
-        chip.appendChild(dot);
-        chip.appendChild(text);
-        chips.appendChild(chip);
-      }
-      stepDiv.appendChild(chips);
-      lookDiv.appendChild(stepDiv);
-    }
-    looksEl.appendChild(lookDiv);
-  }
-}
-
 function stopAll() {
   if (camera) {
     camera.stop();
     camera = null;
   }
-  if (video.srcObject) {
+  if (video && video.srcObject) {
     for (const track of video.srcObject.getTracks()) track.stop();
     video.srcObject = null;
   }
   faceMesh = null;
   latestResults = null;
-  ctx.clearRect(0, 0, overlay.width, overlay.height);
-  btnStart.disabled = false;
-  btnAnalyze.disabled = true;
-  btnStop.disabled = true;
-  setStatus("Stopped.");
+  if (ctx && overlay) ctx.clearRect(0, 0, overlay.width, overlay.height);
+  if (btnGetStarted) btnGetStarted.disabled = false;
+  showStep(1);
 }
 
-btnStart.addEventListener("click", async () => {
-  setStatus("Starting camera…");
+let scanningTimerId = null;
+
+function moveCameraToStep2() {
+  if (video && overlay && scannerFrameLive) {
+    scannerFrameLive.appendChild(video);
+    scannerFrameLive.appendChild(overlay);
+  }
+}
+
+async function initCamera() {
+  if (!video) return;
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
     audio: false,
@@ -315,7 +253,6 @@ btnStart.addEventListener("click", async () => {
   faceMesh.onResults((results) => {
     latestResults = results;
     drawOverlay(results);
-    btnAnalyze.disabled = !(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0);
   });
 
   camera = new Camera(video, {
@@ -324,39 +261,43 @@ btnStart.addEventListener("click", async () => {
     height: 720,
   });
   camera.start();
+}
 
-  btnStart.disabled = true;
-  btnStop.disabled = false;
-  setStatus("Camera started. Center your face and click Analyze.");
+initCamera();
+
+btnGetStarted?.addEventListener("click", () => {
+  if (!video) return;
+  showStep(2);
+  if (btnGetStarted) btnGetStarted.disabled = true;
+  moveCameraToStep2();
+  if (scannerScanningBar) scannerScanningBar.textContent = "Scanning...";
+  if (scanningTimerId) clearTimeout(scanningTimerId);
+  scanningTimerId = setTimeout(() => {
+    scanningTimerId = null;
+    runAnalysis();
+  }, 3000);
 });
-
-btnStop.addEventListener("click", stopAll);
 
 window.addEventListener("resize", () => {
-  if (video.srcObject) resizeOverlay();
+  if (video && video.srcObject) resizeOverlay();
 });
 
-btnAnalyze.addEventListener("click", async () => {
-  if (!latestResults?.multiFaceLandmarks?.length) {
-    setStatus("No face landmarks yet — hold still facing camera.");
-    return;
-  }
+async function runAnalysis() {
+  if (!latestResults?.multiFaceLandmarks?.length) return;
+  showStep(3);
+  animateProgress(2000);
+
   let analysis = analyzeCurrentFrame(latestResults.multiFaceLandmarks[0]);
   if (isFaceApiConfigured()) {
-    setStatus("Sending frame to backend…");
     const backend = await analyzeFrameWithBackend(overlay);
     if (backend?.faceShape) analysis = { ...analysis, faceShape: backend.faceShape };
     if (backend?.lipFullness) analysis = { ...analysis, lipFullness: backend.lipFullness };
-    setStatus("Camera started. Center your face and click Analyze.");
   }
-  renderAnalysis(analysis);
-  const recs = recommend(analysis);
-  renderRecommendations(recs);
 
   const session = await getSession();
   const userId = session?.user?.id;
+  const recs = recommend(analysis);
   if (userId) {
-    setStatus("Saving beauty report to your profile…");
     const reportForProfile = {
       undertone: analysis.undertone,
       confidence: analysis.confidence,
@@ -365,19 +306,17 @@ btnAnalyze.addEventListener("click", async () => {
       sampledSkinRGB: analysis.sampledSkinRGB,
       looks: recs.looks.map((l) => ({ title: l.title })),
     };
-    const { error } = await updateBeautyReport(userId, reportForProfile);
-    if (error) {
-      setStatus("Report saved locally. Could not save to profile: " + error);
-    } else {
-      setStatus("Beauty report saved to your profile. You can view it on Profile.");
-      const fromSurvey = new URLSearchParams(window.location.search).get("fromSurvey") === "1";
-      if (fromSurvey) {
-        await updatePreferences(userId, { has_initial_face_report: true });
-        window.location.href = "/index.html";
-        return;
-      }
-    }
-  } else {
-    setStatus("Analysis complete. Log in to save the report to your profile.");
+    await updateBeautyReport(userId, reportForProfile);
+    const fromSurvey = new URLSearchParams(window.location.search).get("fromSurvey") === "1";
+    if (fromSurvey) await updatePreferences(userId, { has_initial_face_report: true });
   }
+
+  if (progressBarEl) progressBarEl.style.width = "100%";
+  await new Promise((r) => setTimeout(r, 300));
+  showStep(4);
+}
+
+document.getElementById("btnViewResults")?.addEventListener("click", () => {
+  showStep(5);
 });
+

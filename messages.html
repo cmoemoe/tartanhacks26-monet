@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Messages &amp; Communities — Beauty Assistant MVP</title>
+    <title>Find your community — Beauty Assistant MVP</title>
     <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/messages.css" />
   </head>
   <body>
     <div class="phoneShell">
@@ -29,65 +30,59 @@
           </div>
 
           <div class="pageContent">
-            <div class="app appPage">
-              <!-- <header>
-                <h1>Messages &amp; Communities</h1>
-                <p class="sub">Chat and join beauty communities.</p>
-              </header> -->
-              <div class="messagesTabs">
-                <button type="button" class="messagesTab active">Messages</button>
-                <button type="button" class="messagesTab">Communities</button>
+            <div class="app appPage communityPage">
+              <header class="communityHeader">
+                <h1 class="communityTitle">Find your community</h1>
+              </header>
+
+              <div class="searchWithHistory" id="communitySearchWrap">
+                <div class="searchBarWrap" id="communitySearchBar">
+                  <span class="searchIcon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </span>
+                  <input type="search" class="searchInput" id="communitySearchInput" placeholder="Search" autocomplete="off" aria-label="Search communities" />
+                </div>
+                <div class="searchHistoryDropdown" id="communitySearchDropdown" aria-label="Suggested communities">
+                  <p class="searchHistoryTitle">Suggested communities</p>
+                  <ul class="searchHistoryList" id="communitySearchList">
+                    <li class="searchHistoryItem" data-community="divasfindingdupes"><span class="searchHistoryItemText">divasfindingdupes</span><span class="searchHistoryItemIcon">+</span></li>
+                    <li class="searchHistoryItem" data-community="greenbeauty"><span class="searchHistoryItemText">greenbeauty</span><span class="searchHistoryItemIcon">+</span></li>
+                    <li class="searchHistoryItem" data-community="warmundertones"><span class="searchHistoryItemText">warmundertones</span><span class="searchHistoryItemIcon">+</span></li>
+                    <li class="searchHistoryItem" data-community="oliveskintips"><span class="searchHistoryItemText">oliveskintips</span><span class="searchHistoryItemIcon">+</span></li>
+                    <li class="searchHistoryItem" data-community="cooltonescrew"><span class="searchHistoryItemText">cooltonescrew</span><span class="searchHistoryItemIcon">+</span></li>
+                    <li class="searchHistoryItem" data-community="plumblushes"><span class="searchHistoryItemText">plumblushes</span><span class="searchHistoryItemIcon">+</span></li>
+                  </ul>
+                </div>
               </div>
-              <div class="messagesList">
-                <a href="#" class="messageRow">
-                  <div class="messageAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">J</div>
-                  <div class="messageMeta">
-                    <span class="messageName">Jamie</span>
-                    <span class="messagePreview">That shade looks amazing on you!</span>
-                  </div>
-                  <span class="messageTime">2m</span>
-                </a>
-                <a href="#" class="messageRow">
-                  <div class="messageAvatar" style="background: linear-gradient(135deg, #e8d5ff, #d5e8ff);">A</div>
-                  <div class="messageMeta">
-                    <span class="messageName">Alex</span>
-                    <span class="messagePreview">Warm undertone tips?</span>
-                  </div>
-                  <span class="messageTime">1h</span>
-                </a>
-                <a href="#" class="messageRow">
-                  <div class="messageAvatar" style="background: linear-gradient(135deg, #e8fff3, #fff0e8);">C</div>
-                  <div class="messageMeta">
-                    <span class="messageName">Cool Tones Crew</span>
-                    <span class="messagePreview">Community: New tutorial pinned</span>
-                  </div>
-                  <span class="messageTime">3h</span>
-                </a>
-                <a href="#" class="messageRow">
-                  <div class="messageAvatar" style="background: linear-gradient(135deg, #ffe8e8, #e8f0d5);">S</div>
-                  <div class="messageMeta">
-                    <span class="messageName">Shade Match</span>
-                    <span class="messagePreview">Your analysis is ready</span>
-                  </div>
-                  <span class="messageTime">Yesterday</span>
-                </a>
-              </div>
+
               <section class="communitiesSection">
-                <h2 class="sectionTitle">Suggested communities</h2>
-                <div class="communityCard">
-                  <div class="communityCardImg" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);"></div>
-                  <div class="communityCardInfo">
-                    <strong>Warm Undertones</strong>
-                    <span>12k members · Looks &amp; tips</span>
-                  </div>
+                <div class="sectionHeader">
+                  <h2 class="sectionTitle">Communities</h2>
+                  <button type="button" class="viewAllBtn">View All</button>
                 </div>
-                <div class="communityCard">
-                  <div class="communityCardImg" style="background: linear-gradient(135deg, #e8d5ff, #d5e8ff);"></div>
-                  <div class="communityCardInfo">
-                    <strong>Olive Skin Tips</strong>
-                    <span>8k members · Shade matching</span>
-                  </div>
+                <div class="communitiesGrid">
+                  <a href="#" class="communityCard">
+                    <div class="communityCardImg" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);"></div>
+                    <span class="communityCardLabel">divasfindingdupes</span>
+                  </a>
+                  <a href="#" class="communityCard">
+                    <div class="communityCardImg" style="background: linear-gradient(135deg, #e8d5ff, #d5e8ff);"></div>
+                    <span class="communityCardLabel">greenbeauty</span>
+                  </a>
+                  <a href="#" class="communityCard">
+                    <div class="communityCardImg" style="background: linear-gradient(135deg, #e8fff3, #fff0e8);"></div>
+                    <span class="communityCardLabel">warmundertones</span>
+                  </a>
+                  <a href="#" class="communityCard">
+                    <div class="communityCardImg" style="background: linear-gradient(135deg, #ffe8e8, #e8f0d5);"></div>
+                    <span class="communityCardLabel">oliveskintips</span>
+                  </a>
                 </div>
+              </section>
+
+              <section class="topCreatorsSection">
+                <h2 class="sectionTitle">Top Creators</h2>
+                <ul class="topCreatorsList" id="topCreatorsList"></ul>
               </section>
             </div>
           </div>
@@ -125,6 +120,26 @@
     </div>
     <script>
       if (!sessionStorage.getItem("beautyLoggedIn")) { window.location.href = "/login.html"; }
+
+      (function () {
+        var wrap = document.getElementById("communitySearchWrap");
+        var input = document.getElementById("communitySearchInput");
+        if (!wrap || !input) return;
+
+        input.addEventListener("focus", function () { wrap.classList.add("focused"); });
+        input.addEventListener("blur", function () {
+          setTimeout(function () { wrap.classList.remove("focused"); }, 150);
+        });
+
+        document.getElementById("communitySearchList")?.addEventListener("click", function (e) {
+          var item = e.target.closest(".searchHistoryItem");
+          if (item && item.dataset.community) {
+            input.value = item.dataset.community;
+            input.focus();
+          }
+        });
+      })();
     </script>
+    <script type="module" src="/messages.js"></script>
   </body>
 </html>
