@@ -1,4 +1,17 @@
-# Backend setup: Supabase + Flowise
+# Backend setup: Supabase + Flowise / Dedalus
+
+You can power the Explore **Ask AI** feature with either **Dedalus Labs** (cloud API) or **Flowise** (self‑hosted chatflows). If both are configured, **Dedalus is used** when `VITE_DAEDALUS_API_KEY` is set.
+
+## Dedalus (recommended if you prefer a hosted API)
+
+[Dedalus Labs](https://www.dedaluslabs.ai/) provides an OpenAI-compatible chat API with multiple providers (OpenAI, Anthropic, Google, etc.).
+
+1. Sign up at [dedaluslabs.ai](https://www.dedaluslabs.ai) and create an API key in the [Dashboard](https://www.dedaluslabs.ai/dashboard/api-keys).
+2. Add to `.env`:
+   - `VITE_DAEDALUS_API_KEY=your-api-key`
+   - Optional: `VITE_DAEDALUS_API_URL=https://api.dedaluslabs.ai` (default)
+   - Optional: `VITE_DAEDALUS_MODEL=openai/gpt-4o-mini` (or e.g. `anthropic/claude-3-5-sonnet`)
+3. Restart the dev server (`npm run dev`). The Explore page will show **Ask AI (Dedalus)** and use Dedalus for questions.
 
 ## Flowise version (if redirect to /undefined or 403)
 
@@ -32,7 +45,9 @@ If you run Flowise from this project (`npm run flowise`), you can pin the versio
    - `VITE_SUPABASE_URL=...`
    - `VITE_SUPABASE_ANON_KEY=...`
 
-## Flowise (after version fix)
+## Flowise (self‑hosted chatflows)
+
+Use Flowise when you want to run your own chatflow (e.g. custom chains, local models). If `VITE_DAEDALUS_API_KEY` is set, Dedalus is used instead; remove or leave Flowise vars unset to use only Dedalus.
 
 1. Create a Chatflow in the Flowise UI and get its **Chatflow ID** from the URL (e.g. `http://localhost:3000/flow/abc-123` → ID is `abc-123`).
 2. Add to `.env`: `VITE_FLOWISE_API_URL=http://localhost:3000` and `VITE_FLOWISE_CHATFLOW_ID=your-chatflow-id`.

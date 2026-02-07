@@ -1,4 +1,4 @@
-import { askFlowise, isFlowiseConfigured } from "./lib/flowise.js";
+import { askAI, isAIConfigured, getAIBackend } from "./lib/ai.js";
 import { getSession } from "./lib/auth.js";
 
 const searchInput = document.getElementById("searchInput");
@@ -14,14 +14,20 @@ async function checkAuth() {
 }
 checkAuth();
 
+const askAiTitle = document.getElementById("askAiTitle");
+if (askAiTitle) {
+  const backend = getAIBackend();
+  askAiTitle.textContent = backend ? `Ask AI (${backend === "dedalus" ? "Dedalus" : "Flowise"})` : "Ask AI";
+}
+
 if (askAiForm) {
   askAiForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const question = askAiInput?.value?.trim();
     if (!question) return;
 
-    if (!isFlowiseConfigured()) {
-      if (aiResponseEl) aiResponseEl.innerHTML = "<p>AI not configured. Set VITE_FLOWISE_API_URL and VITE_FLOWISE_CHATFLOW_ID in .env and run Flowise.</p>";
+    if (!isAIConfigured()) {
+      if (aiResponseEl) aiResponseEl.innerHTML = "<p>AI not configured. Set VITE_DAEDALUS_API_KEY (Dedalus) or VITE_FLOWISE_* (Flowise) in .env.</p>";
       if (aiResponseCard) aiResponseCard.classList.remove("hidden");
       return;
     }
@@ -33,7 +39,7 @@ if (askAiForm) {
     if (aiResponseEl) aiResponseEl.textContent = "Thinking…";
     if (aiResponseCard) aiResponseCard.classList.remove("hidden");
 
-    const { text, error } = await askFlowise(question);
+    const { text, error } = await askAI(question);
 
     if (askAiSubmit) {
       askAiSubmit.disabled = false;
