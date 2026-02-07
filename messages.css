@@ -1,0 +1,417 @@
+/* Search bar with history dropdown */
+.searchWithHistory {
+  position: relative;
+  margin-top: -8px;
+  margin-bottom: 14px;
+  overflow: visible;
+  z-index: 10;
+}
+
+.searchBarWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e0e0e0;
+  border-radius: 22px;
+  padding: 12px 16px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.searchWithHistory .searchIcon {
+  flex-shrink: 0;
+  color: #555;
+}
+
+.searchWithHistory .searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: #111;
+  padding: 0;
+}
+
+.searchWithHistory .searchInput::placeholder {
+  color: #888;
+}
+
+.searchWithHistory .searchInput:focus {
+  outline: none;
+}
+
+.searchHistoryDropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 12px 0;
+  z-index: 100;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.searchWithHistory.focused .searchHistoryDropdown {
+  display: block;
+}
+
+.searchHistoryTitle {
+  margin: 0 16px 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+}
+
+.searchHistoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.searchHistoryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #555;
+  transition: background 0.15s ease;
+}
+
+.searchHistoryItem:hover {
+  background: #f5f5f5;
+}
+
+.searchHistoryItemText {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchHistoryItemIcon {
+  flex-shrink: 0;
+  color: #5ba3f5;
+}
+
+.searchHistoryItemIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.searchHistoryEmpty {
+  padding: 16px;
+  font-size: 14px;
+  color: #888;
+}
+
+/* Community page layout */
+.communityPage {
+  padding-bottom: 24px;
+}
+
+.communityHeader {
+  position: static;
+  margin-top: -24px;
+  margin-bottom: 4px;
+  padding-top: 36px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: transparent;
+}
+
+.communityTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+}
+
+.trendingSearches {
+  margin-bottom: 24px;
+}
+
+.sectionLabel {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+}
+
+.trendingChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 12px;
+}
+
+.trendingChip {
+  padding: 6px 12px;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.trendingChip:hover {
+  background: #ddd;
+}
+
+.communitiesSection {
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.viewAllBtn {
+  padding: 6px 12px;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 14px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.viewAllBtn:hover {
+  background: #ddd;
+}
+
+.communitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.communityCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: #111;
+}
+
+.communityCardImg {
+  aspect-ratio: 1;
+  background: #e0e0e0;
+  border-radius: 16px;
+}
+
+.communityCardLabel {
+  font-size: 14px;
+  font-weight: 400;
+  color: #111;
+  text-align: center;
+}
+
+.topCreatorsSection .sectionTitle {
+  margin-bottom: 14px;
+}
+
+.topCreatorsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creatorRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.creatorAvatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 50%;
+  background: #e0e0e0;
+}
+
+.creatorInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.creatorUsername {
+  font-size: 15px;
+  font-weight: 400;
+  color: #111;
+}
+
+.creatorFollowers {
+  font-size: 13px;
+  color: #888;
+}
+
+.followBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.followBtn:hover {
+  background: #ddd;
+}
+
+.followIcon {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* General styles for the AI response card */
+#aiResponseCard {
+  display: none;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+#aiResponseCard.hidden {
+  display: none;
+}
+
+/* AI response text */
+#aiResponse {
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Product card styles */
+.aiProductCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.aiProductCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 200px;
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+}
+
+.aiProductCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.aiProductCardImgWrap {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.aiProductCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.aiProductCardPlaceholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.875rem;
+  color: #888;
+  display: none;
+}
+
+.aiProductCardPlaceholder.show {
+  display: block;
+}
+
+.aiProductCardSite {
+  display: block;
+  font-size: 0.875rem;
+  color: #555;
+  margin: 8px 8px 0;
+}
+
+.aiProductCardName {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 4px 8px;
+}
+
+.aiProductCardPrice {
+  display: block;
+  font-size: 0.875rem;
+  color: #007bff;
+  margin: 4px 8px 8px;
+}
+
+/* Intro text for AI product suggestions */
+.aiProductIntro {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+/* Explore AI prompt chips */
+.exploreAiPromptChip {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 4px;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.exploreAiPromptChip:hover {
+  background-color: #0056b3;
+}
