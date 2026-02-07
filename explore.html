@@ -30,10 +30,10 @@
 
           <div class="pageContent">
             <div class="app appPage">
-              <header>
+              <!-- <header>
                 <h1>Explore</h1>
                 <p class="sub">Discover looks and trends from the community.</p>
-              </header>
+              </header> -->
               <div class="exploreSearch">
                 <input type="search" placeholder="Search looks, shades, tutorials..." class="searchInput" id="searchInput" />
               </div>
@@ -43,6 +43,18 @@
                   <input type="text" id="askAiInput" placeholder="e.g. Best lipstick for warm undertone?" class="searchInput" />
                   <button type="submit" class="askAiBtn" id="askAiSubmit">Ask AI</button>
                 </form>
+                <div class="exploreAiPrompts">
+                  <p class="exploreAiPromptsLabel">For you</p>
+                  <div class="exploreAiPromptsRow">
+                    <button type="button" class="exploreAiPromptChip" data-prompt="Best lipstick for me">Best lipstick for me</button>
+                    <button type="button" class="exploreAiPromptChip" data-prompt="My foundation color">My foundation color</button>
+                  </div>
+                  <p class="exploreAiPromptsLabel">Trending</p>
+                  <div class="exploreAiPromptsRow">
+                    <button type="button" class="exploreAiPromptChip" data-prompt="Newest releases">Newest releases</button>
+                    <button type="button" class="exploreAiPromptChip" data-prompt="Neutral eyeshadow palettes">Neutral eyeshadow palettes</button>
+                  </div>
+                </div>
                 <div class="exploreAiResponse" id="aiResponse"></div>
               </div>
               <div class="exploreCategories">
@@ -72,8 +84,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <span>Explore</span>
             </a>
-            <a href="/upload.html" data-nav="upload" title="Upload">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <a href="/upload.html" class="bottomNavAdd" data-nav="upload" title="Upload">
+              <span class="addPostIcon" aria-hidden="true">
+                <svg class="addPostIconShape" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><linearGradient id="addPostGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#6ee7b7"/></linearGradient></defs>
+                  <path d="M20 2L38 20 20 38 2 20 20 2z" fill="url(#addPostGradient)"/>
+                  <path d="M20 12v16M12 20h16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </span>
               <span>Upload</span>
             </a>
             <a href="/messages.html" data-nav="messages" title="Messages">

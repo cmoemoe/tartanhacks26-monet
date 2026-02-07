@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Beauty Assistant MVP (Web)</title>
     <link rel="stylesheet" href="/style.css" />
-
-    <!-- MediaPipe FaceMesh + helpers (CDN) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   </head>
   <body>
     <div class="phoneShell">
@@ -36,59 +31,24 @@
           </div>
     <div class="pageContent">
     <div class="app">
-      <header>
+      <!-- <header>
         <div class="topbar">
           <h1>Beauty Assistant MVP</h1>
           <a href="/login.html" class="logoutLink" id="logoutLink">Log out</a>
         </div>
-        <p class="sub">Tip: face a window / even lighting for better undertone detection.</p>
-      </header>
+      </header> -->
 
-      <main class="grid">
-        <section class="cameraCard">
-          <div class="stage">
-            <video id="video" playsinline autoplay muted></video>
-            <canvas id="overlay"></canvas>
-          </div>
-
-          <div class="controls">
-            <button id="btnStart">Start Camera</button>
-            <button id="btnAnalyze" disabled>Analyze</button>
-            <button id="btnStop" disabled>Stop</button>
-          </div>
-
-          <div class="status" id="status">Ready.</div>
-        </section>
-
-        <section class="resultsCard">
-          <h2>Results</h2>
-
-          <div class="row">
-            <div>
-              <div class="label">Undertone</div>
-              <div class="value" id="undertone">—</div>
+      <main class="mainFeedOnly">
+        <div class="feedHeader">
+          <div class="feedTabsWrap" id="feedTabsWrap">
+            <div class="feedTabsScroll" id="feedTabsScroll">
+              <div class="feedTabs" id="feedTabs" role="tablist"></div>
             </div>
-            <div>
-              <div class="label">Confidence</div>
-              <div class="value" id="confidence">—</div>
-            </div>
+            <button type="button" class="feedTabsEdit" id="feedTabsEdit" aria-label="Edit preferences" title="Edit preferences">Edit</button>
           </div>
-
-          <div class="row">
-            <div>
-              <div class="label">Sampled Skin</div>
-              <div class="swatch" id="skinSwatch"></div>
-            </div>
-          </div>
-
-          <div class="looks" id="looks">
-            <div class="hint">Click Analyze to generate recommendations.</div>
-          </div>
-        </section>
-
-        <section class="feedCard" id="feedSection">
-          <h2>Feed</h2>
-          <div class="feedList" id="feedList">
+        </div>
+        <section class="feedSection" id="feedSection">
+          <div class="feedList feedListPins" id="feedList">
             <div class="hint">Loading feed…</div>
           </div>
         </section>
@@ -96,7 +56,7 @@
 
       <footer>
         <small>
-          MVP note: undertone from a webcam is lighting-sensitive. Add a “white card” calibration step for accuracy.
+          Your feed — share looks from Upload.
         </small>
       </footer>
     </div>
@@ -111,8 +71,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span>Explore</span>
       </a>
-      <a href="/upload.html" data-nav="upload" title="Upload">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <a href="/upload.html" class="bottomNavAdd" data-nav="upload" title="Upload">
+        <span class="addPostIcon" aria-hidden="true">
+          <svg class="addPostIconShape" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="addPostGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#6ee7b7"/></linearGradient></defs>
+            <path d="M20 2L38 20 20 38 2 20 20 2z" fill="url(#addPostGradient)"/>
+            <path d="M20 12v16M12 20h16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </span>
         <span>Upload</span>
       </a>
       <a href="/messages.html" data-nav="messages" title="Messages">
@@ -125,9 +91,37 @@
       </a>
     </nav>
 
+    <div class="prefsModal" id="prefsModal" role="dialog" aria-labelledby="prefsModalTitle" aria-modal="true" aria-hidden="true" hidden>
+      <div class="prefsModalBackdrop" id="prefsModalBackdrop"></div>
+      <div class="prefsModalContent">
+        <div class="prefsModalHeader">
+          <h2 id="prefsModalTitle">Edit preferences</h2>
+          <button type="button" class="prefsModalClose" id="prefsModalClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="prefsModalBody">
+          <section class="prefsModalSection">
+            <h3>Your tabs (style & content)</h3>
+            <p class="prefsModalHint">Select the categories you want as tabs on your feed.</p>
+            <div class="prefsModalChips" id="prefsStyleChips"></div>
+            <div class="prefsModalChips" id="prefsContentChips"></div>
+          </section>
+          <section class="prefsModalSection prefsSuggested">
+            <h3>Suggested for you</h3>
+            <p class="prefsModalHint">Based on what you watch — more suggestions will appear as we learn your taste.</p>
+            <div class="prefsSuggestedPlaceholder" id="prefsSuggestedPlaceholder">No suggestions yet. Keep exploring and we’ll recommend more tabs here.</div>
+            <div class="prefsModalChips" id="prefsSuggestedChips"></div>
+          </section>
+        </div>
+        <div class="prefsModalFooter">
+          <button type="button" class="prefsModalSave" id="prefsModalSave">Save</button>
+        </div>
+      </div>
+    </div>
+
     </div>
       </div>
     </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>

@@ -30,13 +30,13 @@
 
           <div class="pageContent">
             <div class="app appPage">
-              <header class="profileHeader">
+              <!-- <header class="profileHeader">
                 <div class="profileAvatar" id="profileAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">U</div>
                 <div class="profileInfo" id="profileInfo">
                   <h1>Your profile</h1>
                   <p class="sub">Member · Undertone: Not set</p>
                 </div>
-              </header>
+              </header> -->
               <div class="profileBio" id="profileBio">
                 <p>Add a bio in settings. Share your undertone and favorite looks!</p>
               </div>
@@ -46,9 +46,16 @@
                 <div class="profileStat"><strong>0</strong><span>Following</span></div>
               </div>
               <div class="profileActions">
-                <a href="#" class="profileBtn">Edit profile</a>
+                <a href="/scanner.html" class="profileBtn" id="profileFaceScanner">Face Scanner</a>
+                <a href="#" class="profileBtn secondary">Edit profile</a>
                 <a href="/login.html" class="profileBtn secondary" id="profileLogout">Log out</a>
               </div>
+              <section class="profileSection" id="profileBeautyReportSection">
+                <h2 class="sectionTitle">Beauty Report</h2>
+                <div class="beautyReportCard" id="profileBeautyReport">
+                  <div class="hint">No report yet. Use Face Scanner and click Analyze to create one.</div>
+                </div>
+              </section>
               <section class="profileSection">
                 <h2 class="sectionTitle">My looks</h2>
                 <div class="profileLooksGrid" id="profileLooksGrid">
@@ -69,8 +76,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <span>Explore</span>
             </a>
-            <a href="/upload.html" data-nav="upload" title="Upload">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <a href="/upload.html" class="bottomNavAdd" data-nav="upload" title="Upload">
+              <span class="addPostIcon" aria-hidden="true">
+                <svg class="addPostIconShape" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs><linearGradient id="addPostGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c4b5fd"/><stop offset="100%" stop-color="#6ee7b7"/></linearGradient></defs>
+                  <path d="M20 2L38 20 20 38 2 20 20 2z" fill="url(#addPostGradient)"/>
+                  <path d="M20 12v16M12 20h16" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </span>
               <span>Upload</span>
             </a>
             <a href="/messages.html" data-nav="messages" title="Messages">

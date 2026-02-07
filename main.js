@@ -1,20 +1,78 @@
-// Beauty Assistant MVP (Web)
-// - Webcam + MediaPipe FaceMesh
-// - sample skin around a few landmark points
-// - rule-based rec engine
-// - Supabase feed
-
+// Homepage: auth + main feed + preference tabs
 import { getSession, signOut } from "./lib/auth.js";
 import { fetchFeed } from "./lib/posts.js";
 import { isSupabaseConfigured } from "./lib/supabase.js";
+import {
+  getPreferences,
+  updatePreferences,
+  getSuggestedTabs,
+  STYLE_OPTIONS,
+  CONTENT_OPTIONS,
+} from "./lib/preferences.js";
 
 async function ensureAuth() {
   const session = await getSession();
-  if (session || sessionStorage.getItem("beautyLoggedIn")) return;
+  if (session || sessionStorage.getItem("beautyLoggedIn")) return session;
   window.location.href = "/login.html";
+  return null;
 }
 
-ensureAuth();
+function getPreferencesFallback() {
+  const surveyDone = sessionStorage.getItem("beautySurveyDone") === "true";
+  let style = [];
+  let content = [];
+  try {
+    const s = sessionStorage.getItem("beautyStylePrefs");
+    if (s) style = JSON.parse(s);
+  } catch (_) {}
+  try {
+    const c = sessionStorage.getItem("beautyContentPrefs");
+    if (c) content = JSON.parse(c);
+  } catch (_) {}
+  return { survey_completed: surveyDone, style_preferences: style, content_preferences: content };
+}
+
+let currentPreferences = { style_preferences: [], content_preferences: [] };
+
+async function initHome() {
+  const session = await ensureAuth();
+  const userId = session?.user?.id;
+
+  if (isSupabaseConfigured() && userId) {
+    const { data } = await getPreferences(userId);
+    if (data && !data.survey_completed) {
+      window.location.href = "/survey.html";
+      return;
+    }
+    if (data) currentPreferences = data;
+  } else {
+    const fallback = getPreferencesFallback();
+    if (!fallback.survey_completed) {
+      window.location.href = "/survey.html";
+      return;
+    }
+    currentPreferences = fallback;
+  }
+
+  renderTabs();
+  setupTabsScrollWheel();
+  setupPrefsModal(userId);
+  if (feedListEl) loadFeed();
+}
+
+function setupTabsScrollWheel() {
+  const scrollEl = document.getElementById("feedTabsScroll");
+  if (!scrollEl) return;
+  scrollEl.addEventListener("wheel", (e) => {
+    if (e.deltaY === 0) return;
+    const canScrollLeft = scrollEl.scrollLeft > 0;
+    const canScrollRight = scrollEl.scrollLeft < scrollEl.scrollWidth - scrollEl.clientWidth - 1;
+    if ((e.deltaY > 0 && canScrollRight) || (e.deltaY < 0 && canScrollLeft)) {
+      e.preventDefault();
+      scrollEl.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+}
 
 document.getElementById("logoutLink")?.addEventListener("click", async function (e) {
   e.preventDefault();
@@ -23,529 +81,105 @@ document.getElementById("logoutLink")?.addEventListener("click", async function 
   window.location.href = "/login.html";
 });
 
-const video = document.getElementById("video");
-const overlay = document.getElementById("overlay");
-const ctx = overlay.getContext("2d", { willReadFrequently: true });
+const feedTabsEl = document.getElementById("feedTabs");
+const feedTabsEditEl = document.getElementById("feedTabsEdit");
 
-const btnStart = document.getElementById("btnStart");
-const btnAnalyze = document.getElementById("btnAnalyze");
-const btnStop = document.getElementById("btnStop");
-const statusEl = document.getElementById("status");
-
-const undertoneEl = document.getElementById("undertone");
-const confidenceEl = document.getElementById("confidence");
-const skinSwatchEl = document.getElementById("skinSwatch");
-const looksEl = document.getElementById("looks");
-
-// -------------------- Data "structs" --------------------
-/**
- * @typedef {"warm"|"cool"|"neutral"|"olive"} Undertone
- * @typedef {{r:number,g:number,b:number}} ColorRGB
- * @typedef {{undertone:Undertone, confidence:number, sampledSkinRGB:ColorRGB}} FaceAnalysis
- * @typedef {{id:string,name:string,color:ColorRGB,reason:string}} ShadeSuggestion
- * @typedef {{"lipstick"|"blush"|"eyeshadow"}} MakeupCategory
- * @typedef {{id:string,category:MakeupCategory,instruction:string,suggestedShades:ShadeSuggestion[]}} MakeupStep
- * @typedef {{id:string,title:string,intensity:"everyday"|"glam",steps:MakeupStep[]}} LookRecommendation
- * @typedef {{looks:LookRecommendation[]}} RecommendationSet
- */
-
-// -------------------- Recommendation engine --------------------
-class RecommendationEngine {
-  /**
-   * @param {FaceAnalysis} analysis
-   * @returns {RecommendationSet}
-   */
-  recommend(analysis) {
-    const u = analysis.undertone;
-
-    const palettes = {
-      warm: {
-        lipstick: [
-          shade("Peach Nude", rgb(0.86, 0.55, 0.44), "Plays up warm/yellow tones."),
-          shade("Terracotta", rgb(0.72, 0.32, 0.24), "Warm earthy flattering."),
-          shade("Warm Rose", rgb(0.80, 0.38, 0.46), "Balanced warm pink."),
-        ],
-        blush: [
-          shade("Apricot", rgb(0.92, 0.55, 0.36), "Brightens warm undertones."),
-          shade("Peach", rgb(0.95, 0.62, 0.55), "Natural warm flush."),
-        ],
-        eyeshadow: [
-          shade("Bronze", rgb(0.55, 0.39, 0.24), "Warm metallic pop."),
-          shade("Copper", rgb(0.72, 0.36, 0.22), "Enhances warmth."),
-          shade("Olive Gold", rgb(0.46, 0.45, 0.22), "Soft warm glam."),
-        ],
-      },
-      cool: {
-        lipstick: [
-          shade("Mauve", rgb(0.67, 0.42, 0.55), "Cool pink-purple harmony."),
-          shade("Berry", rgb(0.55, 0.20, 0.35), "Bold cool flattering."),
-          shade("Blue-Red", rgb(0.72, 0.10, 0.22), "Classic cool red."),
-        ],
-        blush: [
-          shade("Cool Pink", rgb(0.92, 0.50, 0.65), "Fresh on cool undertones."),
-          shade("Berry Blush", rgb(0.75, 0.30, 0.45), "Depth without turning orange."),
-        ],
-        eyeshadow: [
-          shade("Taupe", rgb(0.52, 0.48, 0.45), "Cool neutral base."),
-          shade("Mauve Smoke", rgb(0.55, 0.36, 0.48), "Cool-toned definition."),
-          shade("Charcoal", rgb(0.22, 0.22, 0.25), "Deep cool contrast."),
-        ],
-      },
-      neutral: {
-        lipstick: [
-          shade("Rose Nude", rgb(0.82, 0.46, 0.52), "Balanced and versatile."),
-          shade("Classic Red", rgb(0.75, 0.14, 0.22), "Works across undertones."),
-          shade("Pink Nude", rgb(0.90, 0.60, 0.66), "Soft everyday option."),
-        ],
-        blush: [
-          shade("Soft Rose", rgb(0.90, 0.55, 0.62), "Neutral flush."),
-          shade("Peach-Rose", rgb(0.92, 0.58, 0.54), "Between warm/cool."),
-        ],
-        eyeshadow: [
-          shade("Champagne", rgb(0.78, 0.70, 0.54), "Easy lid highlight."),
-          shade("Rose Gold", rgb(0.74, 0.52, 0.44), "Neutral glam."),
-          shade("Soft Brown", rgb(0.45, 0.34, 0.28), "Universal crease."),
-        ],
-      },
-      olive: {
-        lipstick: [
-          shade("Brick Rose", rgb(0.66, 0.24, 0.30), "Flattering muted warmth."),
-          shade("Caramel Nude", rgb(0.75, 0.46, 0.34), "Avoids too-pink effect."),
-          shade("Muted Berry", rgb(0.55, 0.26, 0.36), "Color without clashing."),
-        ],
-        blush: [
-          shade("Muted Rose", rgb(0.80, 0.45, 0.52), "Olive-friendly flush."),
-          shade("Mauve Peach", rgb(0.86, 0.52, 0.50), "Soft but not orange."),
-        ],
-        eyeshadow: [
-          shade("Khaki", rgb(0.46, 0.45, 0.32), "Olive harmony."),
-          shade("Bronze Brown", rgb(0.50, 0.36, 0.26), "Natural definition."),
-          shade("Smoky Plum", rgb(0.43, 0.28, 0.38), "Olive-friendly drama."),
-        ],
-      }
-    };
-
-    const p = palettes[u];
-
-    const everyday = {
-      id: `everyday-${u}`,
-      title: "Everyday Look",
-      intensity: "everyday",
-      steps: [
-        {
-          id: "lip",
-          category: "lipstick",
-          instruction: "Pick a comfy shade for daytime.",
-          suggestedShades: p.lipstick.slice(0, 2),
-        },
-        {
-          id: "blush",
-          category: "blush",
-          instruction: "Apply lightly and blend upward for lift.",
-          suggestedShades: p.blush,
-        },
-        {
-          id: "shadow",
-          category: "eyeshadow",
-          instruction: "Use a soft base + a slightly deeper crease color.",
-          suggestedShades: p.eyeshadow.slice(0, 2),
-        },
-      ],
-    };
-
-    const glam = {
-      id: `glam-${u}`,
-      title: "Glam Look",
-      intensity: "glam",
-      steps: [
-        {
-          id: "lip-glam",
-          category: "lipstick",
-          instruction: "Choose a bolder shade and define the lip line.",
-          suggestedShades: p.lipstick,
-        },
-        {
-          id: "shadow-glam",
-          category: "eyeshadow",
-          instruction: "Add depth at outer corner + shimmer on lid.",
-          suggestedShades: p.eyeshadow,
-        },
-      ],
-    };
-
-    // If confidence low, add note by slightly broadening suggestions (still MVP)
-    return { looks: [everyday, glam] };
-  }
+function escapeAttr(s) {
+  return String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
 }
 
-// -------------------- Face + color analysis --------------------
-
-// MediaPipe landmarks indices we’ll sample around (MVP choices):
-// - Left cheek-ish: 234
-// - Right cheek-ish: 454
-// - Forehead-ish: 10
-// These are not perfect, but work well enough for a demo.
-const SAMPLE_POINTS = [234, 454, 10];
-
-const engine = new RecommendationEngine();
-
-let faceMesh = null;
-let camera = null;
-let latestResults = null;
-
-btnStart.addEventListener("click", async () => {
-  await startCameraAndFaceMesh();
-});
-
-btnStop.addEventListener("click", async () => {
-  stopAll();
-});
-
-btnAnalyze.addEventListener("click", () => {
-  if (!latestResults?.multiFaceLandmarks?.length) {
-    setStatus("No face landmarks yet — hold still facing camera.");
-    return;
-  }
-  const analysis = analyzeCurrentFrame(latestResults.multiFaceLandmarks[0]);
-  renderAnalysis(analysis);
-  const recs = engine.recommend(analysis);
-  renderRecommendations(recs);
-});
-
-async function startCameraAndFaceMesh() {
-  setStatus("Starting camera…");
-
-  // Request webcam
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
-    audio: false
+function renderTabs() {
+  if (!feedTabsEl) return;
+  const styles = currentPreferences.style_preferences || [];
+  const contents = currentPreferences.content_preferences || [];
+  const tabIds = [...styles, ...contents];
+  const prefTabs = tabIds.map((id) => `<span class="feedTab" data-tab="${escapeAttr(id)}" role="tab" aria-selected="false">${escapeHtml(id)}</span>`).join("");
+  feedTabsEl.innerHTML =
+    '<span class="feedTab active" data-tab="for-you" role="tab" aria-selected="true">For You</span>' +
+    '<span class="feedTab" data-tab="following" role="tab" aria-selected="false">Following</span>' +
+    prefTabs;
+  feedTabsEl.querySelectorAll(".feedTab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      feedTabsEl.querySelectorAll(".feedTab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      feedTabsEl.querySelectorAll(".feedTab").forEach((t) => { if (t !== tab) t.setAttribute("aria-selected", "false"); });
+    });
   });
-  video.srcObject = stream;
-
-  await video.play();
-
-  // Size overlay to displayed video
-  resizeOverlay();
-  requestAnimationFrame(() => resizeOverlay());
-  setTimeout(resizeOverlay, 120);
-
-
-
-  // Setup FaceMesh
-  faceMesh = new FaceMesh({
-    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-  });
-
-
-  faceMesh.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.6,
-    minTrackingConfidence: 0.6,
-  });
-
-  faceMesh.onResults((results) => {
-    latestResults = results;
-    drawOverlay(results);
-    btnAnalyze.disabled = !(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0);
-  });
-
-  // Use MediaPipe Camera helper (drives frames into FaceMesh)
-  camera = new Camera(video, {
-    onFrame: async () => {
-      await faceMesh.send({ image: video });
-    },
-    width: 1280,
-    height: 720,
-  });
-
-  camera.start();
-
-  btnStart.disabled = true;
-  btnStop.disabled = false;
-
-  setStatus("Camera started. Center your face and click Analyze.");
 }
 
-function stopAll() {
-  if (camera) {
-    camera.stop();
-    camera = null;
-  }
-  if (video.srcObject) {
-    for (const track of video.srcObject.getTracks()) track.stop();
-    video.srcObject = null;
-  }
-  faceMesh = null;
-  latestResults = null;
+function setupPrefsModal(userId) {
+  const modal = document.getElementById("prefsModal");
+  const backdrop = document.getElementById("prefsModalBackdrop");
+  const closeBtn = document.getElementById("prefsModalClose");
+  const saveBtn = document.getElementById("prefsModalSave");
+  const styleChips = document.getElementById("prefsStyleChips");
+  const contentChips = document.getElementById("prefsContentChips");
+  const suggestedChips = document.getElementById("prefsSuggestedChips");
+  const suggestedPlaceholder = document.getElementById("prefsSuggestedPlaceholder");
 
-  ctx.clearRect(0, 0, overlay.width, overlay.height);
-
-  btnStart.disabled = false;
-  btnAnalyze.disabled = true;
-  btnStop.disabled = true;
-
-  setStatus("Stopped.");
-}
-
-function resizeOverlay() {
-  // Match actual pixel size for crisp drawing/sampling
-  const rect = video.getBoundingClientRect();
-  overlay.width = Math.floor(rect.width * devicePixelRatio);
-  overlay.height = Math.floor(rect.height * devicePixelRatio);
-}
-
-window.addEventListener("resize", () => {
-  if (video.srcObject) resizeOverlay();
-});
-
-function drawOverlay(results) {
-  // Draw current video frame to overlay (for sampling from same pixels)
-  const w = overlay.width;
-  const h = overlay.height;
-
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-
-  // draw mirrored video into canvas (selfie view)
-  ctx.translate(w, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, w, h);
-
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-  const landmarks = results.multiFaceLandmarks?.[0];
-  if (!landmarks) {
-    ctx.restore();
-    return;
+  function renderModalChips() {
+    if (!styleChips || !contentChips) return;
+    const styles = currentPreferences.style_preferences || [];
+    const contents = currentPreferences.content_preferences || [];
+    styleChips.innerHTML = STYLE_OPTIONS.map(
+      (opt) =>
+        `<label class="surveyChip"><input type="checkbox" name="prefStyle" value="${escapeAttr(opt)}" ${styles.includes(opt) ? "checked" : ""} /><span class="surveyChipLabel">${escapeHtml(opt)}</span></label>`
+    ).join("");
+    contentChips.innerHTML = CONTENT_OPTIONS.map(
+      (opt) =>
+        `<label class="surveyChip"><input type="checkbox" name="prefContent" value="${escapeAttr(opt)}" ${contents.includes(opt) ? "checked" : ""} /><span class="surveyChipLabel">${escapeHtml(opt)}</span></label>`
+    ).join("");
   }
 
-  // Draw a few sampling point markers
-  for (const idx of SAMPLE_POINTS) {
-    const p = moveTowardCenter(landmarks[idx], landmarks[1], 0.15);
-    if (!p) continue;
-    const x = (1 - p.x) * w; // because we mirrored
-    const y = p.y * h;
-
-    ctx.beginPath();
-    ctx.arc(x, y, 6 * devicePixelRatio, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(255,255,255,0.85)";
-    ctx.lineWidth = 2 * devicePixelRatio;
-    ctx.stroke();
-  }
-
-  ctx.restore();
-}
-
-/**
- * Analyze the current frame by sampling small patches around selected landmarks.
- * @param {Array<{x:number,y:number,z:number}>} landmarks
- * @returns {FaceAnalysis}
- */
-function analyzeCurrentFrame(landmarks) {
-  const faceCenter = landmarks[1];
-  const w = overlay.width;
-  const h = overlay.height;
-
-  // We sample from overlay canvas since it already has the current frame drawn
-  const imgData = ctx.getImageData(0, 0, w, h);
-
-  /** @type {ColorRGB[]} */
-  const samples = [];
-
-  for (const idx of SAMPLE_POINTS) {
-    const p = landmarks[idx];
-    if (!p) continue;
-
-    // Move point inward toward face center
-    const adjusted = moveTowardCenter(p, faceCenter, 0.15);
-
-    const cx = Math.round((1 - adjusted.x) * w); // mirrored
-    const cy = Math.round(adjusted.y * h);
-
-    const patch = samplePatchMedian(
-      imgData,
-      cx,
-      cy,
-      Math.round(18 * devicePixelRatio)
-    );
-
-    if (patch) samples.push(patch);
-  }
-
-
-  // Fallback if somehow no samples
-  const sampled = samples.length ? medianColor(samples) : { r: 0.6, g: 0.5, b: 0.45 };
-
-  const { undertone, confidence } = classifyUndertone(sampled);
-
-  return {
-    undertone,
-    confidence,
-    sampledSkinRGB: sampled,
-  };
-}
-
-/**
- * Sample a square patch centered at (cx, cy) and return a median RGB.
- * Skips very dark/light pixels to reduce highlight/shadow impact.
- */
-function samplePatchMedian(imgData, cx, cy, radius) {
-  const { width, height, data } = imgData;
-
-  const rs = [];
-  const gs = [];
-  const bs = [];
-
-  const x0 = Math.max(0, cx - radius);
-  const x1 = Math.min(width - 1, cx + radius);
-  const y0 = Math.max(0, cy - radius);
-  const y1 = Math.min(height - 1, cy + radius);
-
-  for (let y = y0; y <= y1; y++) {
-    for (let x = x0; x <= x1; x++) {
-      const i = (y * width + x) * 4;
-      const r = data[i] / 255;
-      const g = data[i + 1] / 255;
-      const b = data[i + 2] / 255;
-
-      const maxc = Math.max(r, g, b);
-      const minc = Math.min(r, g, b);
-
-      // Skip extremes
-      if (maxc > 0.97 || minc < 0.04) continue;
-
-      rs.push(r);
-      gs.push(g);
-      bs.push(b);
+  async function openModal() {
+    renderModalChips();
+    const suggested = userId ? await getSuggestedTabs(userId) : { suggestedStyles: [], suggestedContent: [] };
+    const suggestedIds = [...(suggested.suggestedStyles || []), ...(suggested.suggestedContent || [])];
+    if (suggestedPlaceholder) suggestedPlaceholder.style.display = suggestedIds.length ? "none" : "block";
+    if (suggestedChips) {
+      suggestedChips.style.display = suggestedIds.length ? "flex" : "none";
+      suggestedChips.innerHTML = suggestedIds.length
+        ? suggestedIds.map((id) => `<label class="surveyChip surveyChipSuggested"><input type="checkbox" name="prefSuggested" value="${escapeAttr(id)}" /><span class="surveyChipLabel">${escapeHtml(id)}</span></label>`).join("")
+        : "";
+    }
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
     }
   }
 
-  if (rs.length < 30) return null;
-
-  rs.sort((a, b) => a - b);
-  gs.sort((a, b) => a - b);
-  bs.sort((a, b) => a - b);
-
-  const mid = Math.floor(rs.length / 2);
-  return { r: rs[mid], g: gs[mid], b: bs[mid] };
-}
-
-function medianColor(colors) {
-  const rs = colors.map(c => c.r).sort((a,b)=>a-b);
-  const gs = colors.map(c => c.g).sort((a,b)=>a-b);
-  const bs = colors.map(c => c.b).sort((a,b)=>a-b);
-  const mid = Math.floor(colors.length / 2);
-  return { r: rs[mid], g: gs[mid], b: bs[mid] };
-}
-
-/**
- * Undertone heuristic (MVP):
- * - warm: (r+g)/2 > b
- * - cool: b > (r+g)/2
- * - olive: g biased while not strongly warm/cool
- * - neutral: otherwise
- */
-function classifyUndertone(rgb) {
-  const r = clamp01(rgb.r);
-  const g = clamp01(rgb.g);
-  const b = clamp01(rgb.b);
-
-  const warmIndex = (r + g) / 2 - b;
-  const greenBias = g - (r + b) / 2;
-
-  let undertone = "neutral";
-  if (greenBias > 0.06 && Math.abs(warmIndex) < 0.10) undertone = "olive";
-  else if (warmIndex > 0.05) undertone = "warm";
-  else if (warmIndex < -0.05) undertone = "cool";
-
-  const confidence = clamp01(Math.max(0.35, Math.min(0.95, Math.abs(warmIndex) * 1.8 + Math.abs(greenBias) * 1.2)));
-
-  return { undertone, confidence };
-}
-
-// -------------------- UI rendering --------------------
-function renderAnalysis(analysis) {
-  undertoneEl.textContent = capitalize(analysis.undertone);
-  confidenceEl.textContent = `${Math.round(analysis.confidence * 100)}%`;
-  skinSwatchEl.style.background = `rgb(${Math.round(analysis.sampledSkinRGB.r * 255)}, ${Math.round(analysis.sampledSkinRGB.g * 255)}, ${Math.round(analysis.sampledSkinRGB.b * 255)})`;
-}
-
-function renderRecommendations(recs) {
-  looksEl.innerHTML = "";
-
-  for (const look of recs.looks) {
-    const lookDiv = document.createElement("div");
-    lookDiv.className = "look";
-
-    const title = document.createElement("div");
-    title.className = "lookTitle";
-    title.textContent = `${look.title} (${capitalize(look.intensity)})`;
-    lookDiv.appendChild(title);
-
-    for (const step of look.steps) {
-      const stepDiv = document.createElement("div");
-      stepDiv.className = "step";
-
-      const stepTitle = document.createElement("div");
-      stepTitle.className = "stepTitle";
-      stepTitle.textContent = capitalize(step.category);
-      stepDiv.appendChild(stepTitle);
-
-      const instr = document.createElement("div");
-      instr.className = "hint";
-      instr.textContent = step.instruction;
-      stepDiv.appendChild(instr);
-
-      const chips = document.createElement("div");
-      chips.className = "chips";
-
-      for (const s of step.suggestedShades) {
-        const chip = document.createElement("div");
-        chip.className = "chip";
-
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.style.background = `rgb(${Math.round(s.color.r * 255)}, ${Math.round(s.color.g * 255)}, ${Math.round(s.color.b * 255)})`;
-
-        const text = document.createElement("div");
-        text.innerHTML = `<div style="font-weight:800;font-size:12px">${escapeHtml(s.name)}</div>
-                          <div style="color:#b8b8c6;font-size:11px">${escapeHtml(s.reason)}</div>`;
-
-        chip.appendChild(dot);
-        chip.appendChild(text);
-        chips.appendChild(chip);
-      }
-
-      stepDiv.appendChild(chips);
-      lookDiv.appendChild(stepDiv);
+  function closeModal() {
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
     }
-
-    looksEl.appendChild(lookDiv);
   }
+
+  async function saveModal() {
+    const styleValues = Array.from(document.querySelectorAll('input[name="prefStyle"]:checked')).map((el) => el.value);
+    const contentValues = Array.from(document.querySelectorAll('input[name="prefContent"]:checked')).map((el) => el.value);
+    const suggestedValues = Array.from(document.querySelectorAll('input[name="prefSuggested"]:checked')).map((el) => el.value);
+    const newStyles = [...new Set([...styleValues, ...suggestedValues.filter((v) => STYLE_OPTIONS.includes(v))])];
+    const newContents = [...new Set([...contentValues, ...suggestedValues.filter((v) => CONTENT_OPTIONS.includes(v))])];
+    currentPreferences = { ...currentPreferences, style_preferences: newStyles, content_preferences: newContents };
+    if (isSupabaseConfigured() && userId) {
+      await updatePreferences(userId, { style_preferences: newStyles, content_preferences: newContents });
+    } else {
+      sessionStorage.setItem("beautyStylePrefs", JSON.stringify(newStyles));
+      sessionStorage.setItem("beautyContentPrefs", JSON.stringify(newContents));
+    }
+    renderTabs();
+    closeModal();
+  }
+
+  feedTabsEditEl?.addEventListener("click", openModal);
+  closeBtn?.addEventListener("click", closeModal);
+  backdrop?.addEventListener("click", closeModal);
+  saveBtn?.addEventListener("click", saveModal);
 }
 
-// -------------------- helpers --------------------
-function setStatus(text) {
-  statusEl.textContent = text;
-}
-
-function capitalize(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
-function clamp01(x) {
-  return Math.max(0, Math.min(1, x));
-}
-
-function rgb(r, g, b) {
-  return { r, g, b };
-}
-
-function shade(name, color, reason) {
-  return { id: crypto.randomUUID(), name, color, reason };
-}
+initHome();
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (m) => ({
@@ -553,17 +187,43 @@ function escapeHtml(str) {
   }[m]));
 }
 
-function moveTowardCenter(point, center, factor = 0.5) {
-  return {
-    x: point.x + (center.x - point.x) * factor,
-    y: point.y + (center.y - point.y) * factor,
-    z: point.z ?? 0,
-  };
+function formatFeedDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 60000;
+  if (diff < 1) return "Just now";
+  if (diff < 60) return `${Math.floor(diff)}m ago`;
+  if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+  if (diff < 43200) return `${Math.floor(diff / 1440)}d ago`;
+  return d.toLocaleDateString();
 }
 
-// ---------- Feed (Supabase) ----------
 const feedListEl = document.getElementById("feedList");
-const feedSectionEl = document.getElementById("feedSection");
+
+function renderPinMedia(post) {
+  const type = post.post_type || (post.image_url ? "image" : "blog");
+  const urls = post.media_urls?.length ? post.media_urls : (post.image_url ? [post.image_url] : []);
+
+  if (type === "video" && post.video_url) {
+    const thumb = post.image_url || urls[0] || "";
+    const thumbStyle = thumb ? ` style="background-image: url('${escapeHtml(thumb)}');"` : "";
+    return `<div class="feedPinMedia feedPinVideoWrap"${thumbStyle}><span class="feedPinPlayIcon" aria-hidden="true"></span><video class="feedPinVideo" src="${escapeHtml(post.video_url)}" controls playsinline muted loop></video></div>`;
+  }
+  if (type === "slideshow" && urls.length > 0) {
+    const first = urls[0];
+    return `<div class="feedPinMedia feedPinImg" style="background-image: url('${escapeHtml(first)}');"></div>`;
+  }
+  if (type === "blog") {
+    const body = post.caption ? escapeHtml((post.caption || "").slice(0, 120)) : "";
+    return `<div class="feedPinMedia feedPinBlog"><p class="feedPinBlogBody">${body}</p></div>`;
+  }
+  const imgUrl = post.image_url || urls[0];
+  if (imgUrl) {
+    return `<div class="feedPinMedia feedPinImg" style="background-image: url('${escapeHtml(imgUrl)}');"></div>`;
+  }
+  return `<div class="feedPinMedia feedPinPlaceholder"></div>`;
+}
 
 async function loadFeed() {
   if (!feedListEl) return;
@@ -580,36 +240,36 @@ async function loadFeed() {
     .map((post) => {
       const author = post.profiles || {};
       const name = author.full_name || author.username || "Someone";
-      const caption = post.caption ? escapeHtml(post.caption) : "";
-      const tags = (post.tags || []).slice(0, 3).join(" · ");
+      const title = post.caption ? (post.caption.slice(0, 60) + (post.caption.length > 60 ? "…" : "")) : "Untitled";
+      const media = renderPinMedia(post);
+      const sponsored = post.sponsored ? '<span class="feedPinSponsored">Sponsored</span>' : "";
       return `
-        <article class="feedPost">
-          <div class="feedPostHeader">
-            <div class="feedPostAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">${name.charAt(0)}</div>
-            <div class="feedPostMeta">
-              <strong>${escapeHtml(name)}</strong>
-              <span class="feedPostDate">${formatFeedDate(post.created_at)}</span>
-            </div>
+        <article class="feedPin" data-post-type="${escapeHtml(post.post_type || "image")}">
+          <div class="feedPinThumbWrap">
+            ${media}
+            ${sponsored}
           </div>
-          <div class="feedPostImg" style="background-image: url('${escapeHtml(post.image_url)}');"></div>
-          ${caption ? `<p class="feedPostCaption">${caption}</p>` : ""}
-          ${tags ? `<p class="feedPostTags">${escapeHtml(tags)}</p>` : ""}
+          <p class="feedPinTitle">${escapeHtml(title)}</p>
+          <div class="feedPinFooter">
+            <div class="feedPinAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">${name.charAt(0)}</div>
+            <span class="feedPinUsername">${escapeHtml(name)}</span>
+            <button type="button" class="feedPinLike" aria-label="Like"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+          </div>
         </article>
       `;
     })
     .join("");
+
+  feedListEl.querySelectorAll(".feedPinVideoWrap").forEach((wrap) => {
+    const video = wrap.querySelector(".feedPinVideo");
+    if (!video) return;
+    wrap.addEventListener("click", (e) => {
+      if (e.target.closest(".feedPinPlayIcon")) return;
+      wrap.classList.add("is-playing");
+      video.play().catch(() => {});
+    });
+    video.addEventListener("pause", () => wrap.classList.remove("is-playing"));
+  });
 }
 
-function formatFeedDate(iso) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const now = new Date();
-  const diff = (now - d) / 60000;
-  if (diff < 1) return "Just now";
-  if (diff < 60) return `${Math.floor(diff)}m ago`;
-  if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
-  if (diff < 43200) return `${Math.floor(diff / 1440)}d ago`;
-  return d.toLocaleDateString();
-}
-
-if (feedListEl) loadFeed();
+// Feed is loaded from initHome() after survey/preferences check
