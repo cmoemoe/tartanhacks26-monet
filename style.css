@@ -787,6 +787,86 @@ footer {
   min-height: 1.5em;
 }
 
+.aiProductIntro {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.aiProductCards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.aiProductCard {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.aiProductCardImgWrap {
+  position: relative;
+  aspect-ratio: 1;
+  background: linear-gradient(145deg, #f5e6ec, #e8e0f0);
+}
+
+.aiProductCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.aiProductCardPlaceholder {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: linear-gradient(145deg, #f5e6ec, #e8e0f0);
+}
+
+.aiProductCardPlaceholder.show {
+  display: flex;
+}
+
+.aiProductCardSite {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 6px 10px 0;
+}
+
+.aiProductCardName {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 4px 10px 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.aiProductCardPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0 10px 10px;
+}
+
 .exploreCategories {
   display: flex;
   flex-wrap: wrap;
