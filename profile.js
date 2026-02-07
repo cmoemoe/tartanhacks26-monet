@@ -7,6 +7,7 @@ const profileInfo = document.getElementById("profileInfo");
 const profileBio = document.getElementById("profileBio");
 const profileStats = document.getElementById("profileStats");
 const profileLooksGrid = document.getElementById("profileLooksGrid");
+const profileBeautyReport = document.getElementById("profileBeautyReport");
 const profileLogout = document.getElementById("profileLogout");
 
 async function checkAuth() {
@@ -58,12 +59,70 @@ async function loadProfile() {
       profileLooksGrid.innerHTML = '<div class="hint" style="grid-column:1/-1;">No posts yet.</div>';
     } else {
       profileLooksGrid.innerHTML = posts
-        .map(
-          (p) =>
-            `<div class="profileLookThumb" style="background-image: url('${escapeHtml(p.image_url)}'); background-size: cover; background-position: center;"></div>`
-        )
+        .map((p) => {
+          const type = p.post_type || (p.image_url ? "image" : "blog");
+          let style = "";
+          let extra = "";
+          if (type === "video" && p.video_url) {
+            style = "background: linear-gradient(135deg, #1a1a2e, #16213e);";
+            extra = '<span class="profileLookThumbPlay" aria-hidden="true">▶</span>';
+          } else if (type === "blog") {
+            style = "background: linear-gradient(135deg, #f0f0f5, #e8e8f0);";
+            extra = '<span class="profileLookThumbBlog">📝</span>';
+          } else {
+            const url = p.image_url || p.media_urls?.[0];
+            if (url) style = `background-image: url('${escapeHtml(url)}'); background-size: cover; background-position: center;`;
+          }
+          return `<div class="profileLookThumb" style="${style}">${extra}</div>`;
+        })
         .join("");
     }
+  }
+
+  if (profileBeautyReport) {
+    const report = profile?.beauty_report;
+    if (!report) {
+      profileBeautyReport.innerHTML = '<div class="hint">No report yet. Use Face Scanner and click Analyze to create one.</div>';
+      return;
+    }
+    const u = report.undertone ? report.undertone.charAt(0).toUpperCase() + report.undertone.slice(1) : "—";
+    const conf = report.confidence != null ? `${Math.round(report.confidence * 100)}%` : "—";
+    const face = report.faceShape?.label ? report.faceShape.label.charAt(0).toUpperCase() + report.faceShape.label.slice(1) : "—";
+    const lip = report.lipFullness?.label ? report.lipFullness.label.charAt(0).toUpperCase() + report.lipFullness.label.slice(1) : "—";
+    const skin = report.sampledSkinRGB
+      ? `rgb(${Math.round((report.sampledSkinRGB.r ?? 0) * 255)}, ${Math.round((report.sampledSkinRGB.g ?? 0) * 255)}, ${Math.round((report.sampledSkinRGB.b ?? 0) * 255)})`
+      : "transparent";
+    const updated = report.updatedAt ? new Date(report.updatedAt).toLocaleDateString(undefined, { dateStyle: "medium" }) : "";
+    const looksList = (report.looks || []).map((l) => escapeHtml(l.title || l)).join(", ") || "—";
+    profileBeautyReport.innerHTML = `
+      <div class="beautyReportGrid">
+        <div class="beautyReportRow">
+          <span class="label">Undertone</span>
+          <span class="value">${escapeHtml(u)}</span>
+        </div>
+        <div class="beautyReportRow">
+          <span class="label">Confidence</span>
+          <span class="value">${escapeHtml(conf)}</span>
+        </div>
+        <div class="beautyReportRow">
+          <span class="label">Face shape</span>
+          <span class="value">${escapeHtml(face)}</span>
+        </div>
+        <div class="beautyReportRow">
+          <span class="label">Lip fullness</span>
+          <span class="value">${escapeHtml(lip)}</span>
+        </div>
+        <div class="beautyReportRow">
+          <span class="label">Skin sample</span>
+          <span class="beautyReportSwatch" style="background:${skin};"></span>
+        </div>
+        <div class="beautyReportRow">
+          <span class="label">Suggested looks</span>
+          <span class="value">${looksList}</span>
+        </div>
+        ${updated ? `<p class="beautyReportUpdated">Last updated: ${escapeHtml(updated)}</p>` : ""}
+      </div>
+    `;
   }
 }
 

@@ -8,17 +8,24 @@ create table if not exists public.profiles (
   avatar_url text,
   bio text,
   undertone text,
+  survey_completed boolean default false,
+  style_preferences text[] default '{}',
+  content_preferences text[] default '{}',
+  has_initial_face_report boolean default false,
   followers_count int default 0,
   following_count int default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
--- Posts (user uploads)
+-- Posts (user uploads: image, slideshow up to 4, video up to 5s, or text blog up to 200 chars)
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  image_url text not null,
+  post_type text not null default 'image' check (post_type in ('image', 'slideshow', 'video', 'blog')),
+  image_url text,
+  media_urls text[] default '{}',
+  video_url text,
   caption text,
   tags text[] default '{}',
   likes_count int default 0,

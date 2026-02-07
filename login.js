@@ -86,7 +86,11 @@ loginForm.addEventListener("submit", async (e) => {
       }
     }
     sessionStorage.setItem("beautyLoggedIn", "true");
-    window.location.href = "/index.html";
+    if (isSignUp) {
+      window.location.href = "/survey.html";
+    } else {
+      window.location.href = "/index.html";
+    }
   } catch (err) {
     setHint(err.message || "Something went wrong.");
     loginSubmit.disabled = false;

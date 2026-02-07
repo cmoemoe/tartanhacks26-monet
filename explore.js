@@ -1,5 +1,6 @@
 import { askAI, isAIConfigured, getAIBackend } from "./lib/ai.js";
 import { getSession } from "./lib/auth.js";
+import { fetchProfile } from "./lib/posts.js";
 
 const searchInput = document.getElementById("searchInput");
 const askAiForm = document.getElementById("askAiForm");
@@ -39,7 +40,15 @@ if (askAiForm) {
     if (aiResponseEl) aiResponseEl.textContent = "Thinking…";
     if (aiResponseCard) aiResponseCard.classList.remove("hidden");
 
-    const { text, error } = await askAI(question);
+    const session = await getSession();
+    const userId = session?.user?.id;
+    let beautyReport = null;
+    if (userId) {
+      const { data: profile } = await fetchProfile(userId);
+      beautyReport = profile?.beauty_report ?? null;
+    }
+
+    const { text, error } = await askAI(question, { beautyReport });
 
     if (askAiSubmit) {
       askAiSubmit.disabled = false;
@@ -59,6 +68,16 @@ if (askAiForm) {
     }
   });
 }
+
+document.querySelectorAll(".exploreAiPromptChip").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const prompt = btn.getAttribute("data-prompt");
+    if (prompt && askAiInput) {
+      askAiInput.value = prompt;
+      if (askAiForm) askAiForm.requestSubmit();
+    }
+  });
+});
 
 function parseProductResponse(text) {
   if (!text || typeof text !== "string") return null;

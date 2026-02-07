@@ -2,6 +2,20 @@
 
 You can power the Explore **Ask AI** feature with either **Dedalus Labs** (cloud API) or **Flowise** (self‑hosted chatflows). If both are configured, **Dedalus is used** when `VITE_DAEDALUS_API_KEY` is set.
 
+## Quick fix: "Could not find the 'beauty_report' column"
+
+If the Face Scanner shows **Report saved locally. Could not save to profile: Could not find the 'beauty_report' column**, add the column in Supabase:
+
+1. Open your project at [supabase.com](https://supabase.com) → **SQL Editor**.
+2. Run this (or the contents of `supabase/migrations/add_beauty_report.sql`):
+
+```sql
+alter table public.profiles
+  add column if not exists beauty_report jsonb default null;
+```
+
+3. Run **Analyze** again on the Face Scanner page; the report will save to your profile.
+
 ## Dedalus (recommended if you prefer a hosted API)
 
 [Dedalus Labs](https://www.dedaluslabs.ai/) provides an OpenAI-compatible chat API with multiple providers (OpenAI, Anthropic, Google, etc.).
@@ -10,7 +24,7 @@ You can power the Explore **Ask AI** feature with either **Dedalus Labs** (cloud
 2. Add to `.env`:
    - `VITE_DAEDALUS_API_KEY=your-api-key`
    - Optional: `VITE_DAEDALUS_API_URL=https://api.dedaluslabs.ai` (default)
-   - Optional: `VITE_DAEDALUS_MODEL=openai/gpt-4o-mini` (or e.g. `anthropic/claude-3-5-sonnet`)
+   - Optional: `VITE_DAEDALUS_MODEL=google/gemini-1.5-flash` (default; or e.g. `google/gemini-1.5-pro`, `openai/gpt-4o-mini`)
 3. Restart the dev server (`npm run dev`). The Explore page will show **Ask AI (Dedalus)** and use Dedalus for questions.
 
 ## Flowise version (if redirect to /undefined or 403)
@@ -40,8 +54,10 @@ If you run Flowise from this project (`npm run flowise`), you can pin the versio
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. In **SQL Editor**, run the contents of `supabase/schema.sql`.
-3. In **Storage**, create a bucket named **posts**, set it to **Public**, and add policies (public read; authenticated insert; user-scoped update/delete).
-4. Copy your project URL and anon key from **Settings > API** into `.env`:
+3. If you already have a `profiles` table without a `beauty_report` column, run `supabase/migrations/add_beauty_report.sql` in the SQL Editor to add it (for the Face Scanner beauty report).
+4. If you already have a `posts` table, run `supabase/migrations/add_post_types.sql` in the SQL Editor to add slideshow, video, and blog support (post_type, media_urls, video_url; image_url nullable).
+5. In **Storage**, create a bucket named **posts**, set it to **Public**, and add policies (public read; authenticated insert; user-scoped update/delete). Allow both image and video file types for slideshows and short videos.
+6. Copy your project URL and anon key from **Settings > API** into `.env`:
    - `VITE_SUPABASE_URL=...`
    - `VITE_SUPABASE_ANON_KEY=...`
 
@@ -73,3 +89,38 @@ Using a **Basic LLM Chain** or **Conversation Chain** template when creating the
 npm install
 npm run dev
 ```
+
+## Facial geometry (and OpenCV)
+
+The face scanner uses **MediaPipe Face Mesh** in the browser and **`lib/face-geometry.js`** to derive facial geometry from 468 landmarks: face shape (oval), lip shape, left/right eye shape, nose shape, and left/right eyebrow shape. Each region has ordered contour points and simple metrics (center, width, height, aspect ratio). No OpenCV is required for this.
+
+If you want to use **OpenCV** for facial geometry:
+
+- **Browser (opencv.js):** OpenCV compiled to WebAssembly can run in the browser, but it typically provides face *detection* (bounding box) and optionally 5-point landmarks, not the dense 468-point mesh. You can use [opencv.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html) for detection and then keep using MediaPipe for landmarks, or process contours with OpenCV on top of MediaPipe points.
+- **Backend (Python + OpenCV/dlib):** Send a snapshot (e.g. `canvas.toDataURL('image/jpeg')`) from the scanner to a small API that runs OpenCV and dlib (or MediaPipe) to compute 68- or 468-point landmarks, then return JSON. Your frontend can call that API and pass the returned landmarks into `getFaceGeometry()` (using the same index convention) or use the backend’s own geometry output.
+
+## Face analysis backend (face shape + lip fullness)
+
+An optional Python backend can receive the current camera frame and return **face shape** and **lip fullness** so the app can use server-side analysis (e.g. MediaPipe/OpenCV on the server).
+
+1. **Create a virtualenv and install dependencies**
+   ```bash
+   cd backend
+   python -m venv .venv
+   .venv\Scripts\activate   # Windows
+   # source .venv/bin/activate   # macOS/Linux
+   pip install -r requirements.txt
+   ```
+
+2. **Run the backend** (from the `backend` folder, with venv activated)
+   ```bash
+   python -m flask --app app run -p 5000
+   ```
+   Or: `python app.py` (runs on port 5000).
+
+3. **Point the frontend at the backend**  
+   In the project root `.env` add:
+   ```env
+   VITE_FACE_API_URL=http://localhost:5000
+   ```
+   Restart `npm run dev`. When you click **Analyze**, the app will POST the current frame to `POST /api/analyze-face` and use the returned `faceShape` and `lipFullness` in the results (overwriting the in-browser classification when the backend responds).
