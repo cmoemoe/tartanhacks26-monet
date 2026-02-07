@@ -485,6 +485,12 @@ footer {
   padding: 0 14px 24px 14px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.phoneScreen .app::-webkit-scrollbar {
+  display: none;
 }
 
 /* Header extends to the very top of the iPhone (full width, into status bar area) */
