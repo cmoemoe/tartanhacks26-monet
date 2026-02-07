@@ -273,6 +273,87 @@ footer {
   padding: 0 4px;
 }
 
+/* Feed (Supabase) */
+.feedCard {
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  overflow: hidden;
+}
+
+.feedCard h2 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feedPost {
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--border);
+}
+
+.feedPostHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.feedPostAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.feedPostMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feedPostMeta strong { font-size: 14px; }
+.feedPostDate { font-size: 11px; color: var(--muted2); }
+
+.feedPostImg {
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  background-color: #eee;
+}
+
+.feedPostCaption,
+.feedPostTags {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.feedPostTags {
+  color: var(--muted);
+  font-size: 12px;
+  padding-top: 0;
+}
+
 /* ---------- iPhone preview shell ---------- */
 .phoneShell {
   min-height: 100vh;
@@ -620,6 +701,14 @@ footer {
   text-align: center;
 }
 
+.loginError {
+  margin: 10px 0 0 0;
+  font-size: 12px;
+  color: #c00;
+  text-align: center;
+  min-height: 1.2em;
+}
+
 /* ---------- App sub-pages (Explore, Upload, Messages, Profile) ---------- */
 .appPage header {
   padding-bottom: 8px;
@@ -651,6 +740,51 @@ footer {
 
 .searchInput::placeholder {
   color: var(--muted2);
+}
+
+.exploreAi {
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  border: 1px solid var(--border);
+}
+
+.exploreAi.hidden {
+  display: none;
+}
+
+.exploreAiTitle {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.exploreAiForm {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.exploreAiForm .searchInput {
+  flex: 1;
+}
+
+.askAiBtn {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.exploreAiResponse {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 1.5em;
 }
 
 .exploreCategories {
@@ -738,6 +872,25 @@ footer {
   color: var(--muted);
   font-size: 13px;
   pointer-events: none;
+}
+
+.uploadPreview {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.uploadZoneInner.hasImage .uploadIcon,
+.uploadZoneInner.hasImage span { opacity: 0.3; }
+
+.uploadError {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #c00;
+  min-height: 1.2em;
 }
 
 .uploadIcon {

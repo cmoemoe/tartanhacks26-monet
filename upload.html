@@ -38,10 +38,12 @@
                 <div class="uploadZone" id="uploadZone">
                   <input type="file" id="uploadInput" accept="image/*" class="uploadInput" />
                   <div class="uploadZoneInner">
+                    <div class="uploadPreview" id="uploadPreview"></div>
                     <svg class="uploadIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     <span>Tap to add photo or drag here</span>
                   </div>
                 </div>
+                <p class="uploadError" id="uploadError" aria-live="polite"></p>
                 <div class="uploadField">
                   <label for="uploadCaption">Caption</label>
                   <textarea id="uploadCaption" name="caption" placeholder="Describe your look, shades used..." rows="3"></textarea>
@@ -50,7 +52,7 @@
                   <label for="uploadTags">Tags (optional)</label>
                   <input type="text" id="uploadTags" name="tags" placeholder="e.g. everyday, warm, lipstick" />
                 </div>
-                <button type="submit" class="uploadSubmit">Post</button>
+                <button type="submit" class="uploadSubmit" id="uploadSubmit">Post</button>
               </form>
             </div>
           </div>
@@ -80,10 +82,11 @@
         </div>
       </div>
     </div>
-    <script>
-      if (!sessionStorage.getItem("beautyLoggedIn")) { window.location.href = "/login.html"; }
-      document.getElementById("uploadZone").addEventListener("click", function () { document.getElementById("uploadInput").click(); });
-      document.getElementById("uploadForm").addEventListener("submit", function (e) { e.preventDefault(); alert("Post shared! (Demo)"); });
+    <script type="module" src="/upload.js"></script>
+    <script type="module">
+      import { getSession } from "/lib/auth.js";
+      const session = await getSession();
+      if (!session && !sessionStorage.getItem("beautyLoggedIn")) window.location.href = "/login.html";
     </script>
   </body>
 </html>

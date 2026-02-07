@@ -35,7 +35,15 @@
                 <p class="sub">Discover looks and trends from the community.</p>
               </header>
               <div class="exploreSearch">
-                <input type="search" placeholder="Search looks, shades, tutorials..." class="searchInput" />
+                <input type="search" placeholder="Search looks, shades, tutorials..." class="searchInput" id="searchInput" />
+              </div>
+              <div class="exploreAi" id="aiResponseCard">
+                <h3 class="exploreAiTitle">Ask AI (Flowise)</h3>
+                <form class="exploreAiForm" id="askAiForm">
+                  <input type="text" id="askAiInput" placeholder="e.g. Best lipstick for warm undertone?" class="searchInput" />
+                  <button type="submit" class="askAiBtn" id="askAiSubmit">Ask AI</button>
+                </form>
+                <div class="exploreAiResponse" id="aiResponse"></div>
               </div>
               <div class="exploreCategories">
                 <button type="button" class="chip active">All</button>
@@ -80,8 +88,6 @@
         </div>
       </div>
     </div>
-    <script>
-      if (!sessionStorage.getItem("beautyLoggedIn")) { window.location.href = "/login.html"; }
-    </script>
+    <script type="module" src="/explore.js"></script>
   </body>
 </html>

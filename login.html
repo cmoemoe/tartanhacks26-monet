@@ -35,6 +35,10 @@
             </header>
 
             <form id="loginForm" class="loginForm" novalidate>
+              <div class="loginField" id="signupNameRow" style="display: none;">
+                <label for="signupName">Name</label>
+                <input type="text" id="signupName" name="full_name" placeholder="Your name" autocomplete="name" />
+              </div>
               <div class="loginField">
                 <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email" required />
@@ -43,20 +47,15 @@
                 <label for="loginPassword">Password</label>
                 <input type="password" id="loginPassword" name="password" placeholder="••••••••" autocomplete="current-password" required />
               </div>
-              <button type="submit" class="loginSubmit">Log in</button>
+              <button type="submit" class="loginSubmit" id="loginSubmit">Log in</button>
             </form>
 
-            <p class="loginHint">Demo: any email and password will work.</p>
+            <p class="loginHint" id="loginHint"><span id="loginHintText">No account? </span><a href="#" id="signupToggle">Sign up</a><span id="loginHintSuffix"> with email and password.</span></p>
+            <p class="loginError" id="loginError" aria-live="polite"></p>
           </div>
         </div>
       </div>
     </div>
-    <script>
-      document.getElementById("loginForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        sessionStorage.setItem("beautyLoggedIn", "true");
-        window.location.href = "/index.html";
-      });
-    </script>
+    <script type="module" src="/login.js"></script>
   </body>
 </html>

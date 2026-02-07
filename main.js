@@ -1,15 +1,24 @@
 // Beauty Assistant MVP (Web)
 // - Webcam + MediaPipe FaceMesh
 // - sample skin around a few landmark points
-// - simple undertone heuristic
 // - rule-based rec engine
+// - Supabase feed
 
-if (!sessionStorage.getItem("beautyLoggedIn")) {
+import { getSession, signOut } from "./lib/auth.js";
+import { fetchFeed } from "./lib/posts.js";
+import { isSupabaseConfigured } from "./lib/supabase.js";
+
+async function ensureAuth() {
+  const session = await getSession();
+  if (session || sessionStorage.getItem("beautyLoggedIn")) return;
   window.location.href = "/login.html";
 }
 
-document.getElementById("logoutLink")?.addEventListener("click", function (e) {
+ensureAuth();
+
+document.getElementById("logoutLink")?.addEventListener("click", async function (e) {
   e.preventDefault();
+  if (isSupabaseConfigured()) await signOut();
   sessionStorage.removeItem("beautyLoggedIn");
   window.location.href = "/login.html";
 });
@@ -551,3 +560,56 @@ function moveTowardCenter(point, center, factor = 0.5) {
     z: point.z ?? 0,
   };
 }
+
+// ---------- Feed (Supabase) ----------
+const feedListEl = document.getElementById("feedList");
+const feedSectionEl = document.getElementById("feedSection");
+
+async function loadFeed() {
+  if (!feedListEl) return;
+  const { data, error } = await fetchFeed();
+  if (error) {
+    feedListEl.innerHTML = `<div class="hint">Feed unavailable. Add Supabase to load posts.</div>`;
+    return;
+  }
+  if (!data || data.length === 0) {
+    feedListEl.innerHTML = `<div class="hint">No posts yet. Share a look from Upload!</div>`;
+    return;
+  }
+  feedListEl.innerHTML = data
+    .map((post) => {
+      const author = post.profiles || {};
+      const name = author.full_name || author.username || "Someone";
+      const caption = post.caption ? escapeHtml(post.caption) : "";
+      const tags = (post.tags || []).slice(0, 3).join(" · ");
+      return `
+        <article class="feedPost">
+          <div class="feedPostHeader">
+            <div class="feedPostAvatar" style="background: linear-gradient(135deg, #ffd6e8, #d8e8ff);">${name.charAt(0)}</div>
+            <div class="feedPostMeta">
+              <strong>${escapeHtml(name)}</strong>
+              <span class="feedPostDate">${formatFeedDate(post.created_at)}</span>
+            </div>
+          </div>
+          <div class="feedPostImg" style="background-image: url('${escapeHtml(post.image_url)}');"></div>
+          ${caption ? `<p class="feedPostCaption">${caption}</p>` : ""}
+          ${tags ? `<p class="feedPostTags">${escapeHtml(tags)}</p>` : ""}
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function formatFeedDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 60000;
+  if (diff < 1) return "Just now";
+  if (diff < 60) return `${Math.floor(diff)}m ago`;
+  if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+  if (diff < 43200) return `${Math.floor(diff / 1440)}d ago`;
+  return d.toLocaleDateString();
+}
+
+if (feedListEl) loadFeed();
